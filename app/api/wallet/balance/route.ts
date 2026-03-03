@@ -25,6 +25,8 @@ export async function GET() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  console.log("Fetching wallet balance for user:", session.userId);
+
   const wallet = await queryWithRetry(() =>
     db.query.wallets.findFirst({
       where: (wallets, { eq }) => eq(wallets.userId, session.userId)
@@ -32,8 +34,11 @@ export async function GET() {
   );
 
   if (!wallet) {
+    console.error("Wallet not found for user:", session.userId);
     return NextResponse.json({ message: "Wallet not found" }, { status: 404 });
   }
+
+  console.log("Wallet found. Balance:", wallet.balance, "Updated at:", wallet.updatedAt);
 
   return NextResponse.json({ 
     balance: wallet.balance, 

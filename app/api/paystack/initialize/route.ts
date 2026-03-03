@@ -40,6 +40,8 @@ export async function POST(request: Request) {
     const amountKobo = amount * 100;
     const reference = `jv_${nanoid(10)}`;
 
+    console.log("Initializing payment. User:", session.userId, "Amount:", amountKobo, "Reference:", reference);
+
     // Verify wallet exists
     const wallet = await queryWithRetry(() =>
       db.query.wallets.findFirst({
@@ -48,11 +50,14 @@ export async function POST(request: Request) {
     );
 
     if (!wallet) {
+      console.error("Wallet not found for user:", session.userId);
       return NextResponse.json(
         { message: "Wallet not found. Please try logging out and back in." },
         { status: 404 }
       );
     }
+
+    console.log("Wallet found. Creating transaction record...");
 
     await queryWithRetry(() =>
       db.insert(walletTransactions).values({
@@ -67,6 +72,8 @@ export async function POST(request: Request) {
       })
     );
 
+    console.log("Transaction record created. Initializing Paystack...");
+
     const init = await initializePaystackTransaction({
       email: session.email,
       amount: amountKobo,
@@ -74,6 +81,8 @@ export async function POST(request: Request) {
       metadata: { userId: session.userId },
       channels: ["card", "bank_transfer"]
     });
+
+    console.log("Paystack initialized. Access code:", init.data.access_code);
 
     return NextResponse.json({
       accessCode: init.data.access_code,
