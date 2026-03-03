@@ -36,7 +36,7 @@ export async function verifyNinWithYouVerify(nin: string) {
   const response = await fetch(`${baseUrl}/identities/candidates/check`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      "token": token,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
