@@ -106,7 +106,9 @@ export async function POST(request: Request) {
     let response;
     try {
       response = await verifyNinWithYouVerify(cleanNin);
+      console.log("YouVerify response:", JSON.stringify(response, null, 2));
     } catch (error) {
+      console.error("YouVerify API error:", error);
       await handleRefund({
         verificationId,
         debitId,
@@ -114,16 +116,17 @@ export async function POST(request: Request) {
         masked,
         reason: "Verification provider error"
       });
-      console.error("NIN verification provider error:", error);
       const message = getFriendlyErrorMessage(
         error,
-        "We couldn’t reach the verification provider. Your wallet has been refunded."
+        "We couldn't reach the verification provider. Your wallet has been refunded."
       );
       return NextResponse.json({ message }, { status: 502 });
     }
 
     const status = response.data?.status?.toLowerCase();
     const details = response.data?.response;
+
+    console.log("Verification check - Status:", status, "Has details:", !!details);
 
     if (status === "found" && details) {
       const fullName = [details.first_name, details.middle_name, details.last_name]
@@ -159,6 +162,7 @@ export async function POST(request: Request) {
       });
     }
 
+    console.log("NIN verification failed - refunding");
     await handleRefund({
       verificationId,
       debitId,
@@ -173,9 +177,13 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("NIN verification error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     const message = getFriendlyErrorMessage(
       error,
-      "We couldn’t complete the verification. Please try again in a few minutes."
+      "We couldn't complete the verification. Please try again in a few minutes."
     );
     return NextResponse.json({ message }, { status: 500 });
   }
@@ -188,31 +196,45 @@ async function handleRefund(params: {
   masked: string;
   reason: string;
 }) {
-  await db.transaction(async (tx) => {
-    await tx
-      .update(ninVerifications)
-      .set({ status: "failed", errorMessage: params.reason })
-      .where(eq(ninVerifications.id, params.verificationId));
+  let lastError: unknown;
+  for (let i = 0; i <= 2; i++) {
+    try {
+      await db.transaction(async (tx) => {
+        await tx
+          .update(ninVerifications)
+          .set({ status: "failed", errorMessage: params.reason })
+          .where(eq(ninVerifications.id, params.verificationId));
 
-    await tx
-      .update(walletTransactions)
-      .set({ status: "refunded" })
-      .where(eq(walletTransactions.id, params.debitId));
+        await tx
+          .update(walletTransactions)
+          .set({ status: "refunded" })
+          .where(eq(walletTransactions.id, params.debitId));
 
-    await tx.insert(walletTransactions).values({
-      id: nanoid(),
-      userId: params.userId,
-      type: "refund",
-      status: "completed",
-      amount: VERIFICATION_FEE,
-      provider: "system",
-      description: "NIN verification refund",
-      ninMasked: params.masked
-    });
+        await tx.insert(walletTransactions).values({
+          id: nanoid(),
+          userId: params.userId,
+          type: "refund",
+          status: "completed",
+          amount: VERIFICATION_FEE,
+          provider: "system",
+          description: "NIN verification refund",
+          ninMasked: params.masked
+        });
 
-    await tx
-      .update(wallets)
-      .set({ balance: sql`${wallets.balance} + ${VERIFICATION_FEE}` })
-      .where(eq(wallets.userId, params.userId));
-  });
+        await tx
+          .update(wallets)
+          .set({ balance: sql`${wallets.balance} + ${VERIFICATION_FEE}` })
+          .where(eq(wallets.userId, params.userId));
+      });
+      return;
+    } catch (error) {
+      lastError = error;
+      console.error("Refund attempt failed:", error);
+      if (i < 2) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+      }
+    }
+  }
+  console.error("Refund failed after retries:", lastError);
+  throw lastError;
 }
