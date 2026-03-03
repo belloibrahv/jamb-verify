@@ -27,10 +27,16 @@ export function DashboardClient() {
   } | null>(null);
 
   const loadBalance = async () => {
-    const res = await fetch("/api/wallet/balance");
-    if (res.ok) {
-      const data = await res.json();
-      setBalance(data.balance);
+    try {
+      const res = await fetch("/api/wallet/balance", {
+        cache: "no-store"
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBalance(data.balance);
+      }
+    } catch (error) {
+      console.error("Failed to load balance:", error);
     }
   };
 
@@ -62,11 +68,37 @@ export function DashboardClient() {
       
       // Handle successful payment
       popup.onClose = async () => {
-        // Wait a bit for webhook to process, then verify and refresh
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await fetch(`/api/paystack/verify?reference=${data.reference}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await loadBalance();
+        // Wait for webhook to process
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Verify payment with retries
+        for (let i = 0; i < 3; i++) {
+          try {
+            const verifyRes = await fetch(`/api/paystack/verify?reference=${data.reference}`);
+            if (verifyRes.ok) {
+              break;
+            }
+          } catch (error) {
+            console.error("Verify attempt failed:", error);
+          }
+          if (i < 2) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+        
+        // Wait a bit more for database to update
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Refresh balance multiple times to ensure it updates
+        for (let i = 0; i < 3; i++) {
+          await loadBalance();
+          if (balance && balance > 0) {
+            break;
+          }
+          if (i < 2) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
       };
 
       popup.resumeTransaction(data.accessCode);
