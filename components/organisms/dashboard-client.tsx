@@ -17,6 +17,7 @@ export function DashboardClient() {
   const [balance, setBalance] = useState<number | null>(null);
   const [amount, setAmount] = useState("500");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [nin, setNin] = useState("");
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -34,9 +35,29 @@ export function DashboardClient() {
       if (res.ok) {
         const data = await res.json();
         setBalance(data.balance);
+        return true;
+      } else {
+        console.error("Failed to load balance:", res.status);
+        return false;
       }
     } catch (error) {
       console.error("Failed to load balance:", error);
+      return false;
+    }
+  };
+
+  const handleRefreshBalance = async () => {
+    setRefreshing(true);
+    try {
+      const success = await loadBalance();
+      if (!success) {
+        setResult({
+          status: "error",
+          message: "Failed to refresh balance. Please try again."
+        });
+      }
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -196,8 +217,8 @@ export function DashboardClient() {
               <Button onClick={handleFundWallet} disabled={loading || amountInvalid}>
                 {loading ? "Opening Paystack..." : "Fund wallet"}
               </Button>
-              <Button variant="outline" onClick={loadBalance}>
-                Refresh balance
+              <Button variant="outline" onClick={handleRefreshBalance} disabled={refreshing}>
+                {refreshing ? "Refreshing..." : "Refresh balance"}
               </Button>
             </div>
           </CardContent>
