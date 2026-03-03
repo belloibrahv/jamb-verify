@@ -1,0 +1,88 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6)
+});
+
+type FormValues = z.infer<typeof schema>;
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const form = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  const onSubmit = async (values: FormValues) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Unable to login");
+      }
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md space-y-6 border-border/70 bg-white/90 p-8 shadow-card">
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
+          Welcome back
+        </p>
+        <h1 className="font-heading text-3xl font-semibold">Sign in to your wallet</h1>
+        <p className="text-sm text-muted-foreground">
+          Access your NIN verifications and receipts.
+        </p>
+      </div>
+      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Email</label>
+          <Input placeholder="you@example.com" {...form.register("email")} />
+          {form.formState.errors.email ? (
+            <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
+          ) : null}
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Password</label>
+          <Input type="password" {...form.register("password")} />
+          {form.formState.errors.password ? (
+            <p className="text-xs text-red-500">
+              {form.formState.errors.password.message}
+            </p>
+          ) : null}
+        </div>
+        {error ? <p className="text-sm text-red-500">{error}</p> : null}
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
+        </Button>
+      </form>
+      <p className="text-center text-sm text-muted-foreground">
+        New to JAMB Verify?{" "}
+        <Link href="/register" className="font-semibold text-primary">
+          Create account
+        </Link>
+      </p>
+    </Card>
+  );
+}
