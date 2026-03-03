@@ -4,11 +4,12 @@ import { getSession } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { PrintButton } from "@/components/organisms/print-button";
 
-interface ReceiptPageProps {
-  params: { id: string };
-}
-
-export default async function ReceiptPage({ params }: ReceiptPageProps) {
+export default async function ReceiptPage({
+  params
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     return notFound();
@@ -16,7 +17,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
 
   const verification = await db.query.ninVerifications.findFirst({
     where: (table, { eq, and }) =>
-      and(eq(table.id, params.id), eq(table.userId, session.userId))
+      and(eq(table.id, id), eq(table.userId, session.userId))
   });
 
   if (!verification) {
