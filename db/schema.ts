@@ -40,7 +40,8 @@ export const wallets = pgTable("wallets", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
   balance: integer("balance").notNull().default(0),
   currency: text("currency").notNull().default("NGN"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()

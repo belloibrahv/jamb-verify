@@ -26,7 +26,10 @@ async function updateWalletWithRetry(reference: string, amount: number, retries 
 
         await tx
           .update(wallets)
-          .set({ balance: sql`${wallets.balance} + ${amount}` })
+          .set({ 
+            balance: sql`${wallets.balance} + ${amount}`,
+            updatedAt: sql`now()`
+          })
           .where(eq(wallets.userId, txn.userId));
       });
       return;

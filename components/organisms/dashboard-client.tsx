@@ -69,7 +69,7 @@ export function DashboardClient() {
       // Handle successful payment
       popup.onClose = async () => {
         // Wait for webhook to process
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Verify payment with retries
         for (let i = 0; i < 3; i++) {
@@ -86,18 +86,32 @@ export function DashboardClient() {
           }
         }
         
-        // Wait a bit more for database to update
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Refresh balance with proper state checking
+        let updated = false;
+        for (let i = 0; i < 5; i++) {
+          try {
+            const res = await fetch("/api/wallet/balance", {
+              cache: "no-store"
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setBalance(data.balance);
+              // Check if balance actually increased
+              if (data.balance > 0) {
+                updated = true;
+                break;
+              }
+            }
+          } catch (error) {
+            console.error("Balance fetch failed:", error);
+          }
+          if (i < 4) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+        }
         
-        // Refresh balance multiple times to ensure it updates
-        for (let i = 0; i < 3; i++) {
-          await loadBalance();
-          if (balance && balance > 0) {
-            break;
-          }
-          if (i < 2) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
+        if (!updated) {
+          console.warn("Balance may not have updated. Please refresh manually.");
         }
       };
 

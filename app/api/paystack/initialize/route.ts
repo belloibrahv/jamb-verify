@@ -40,6 +40,20 @@ export async function POST(request: Request) {
     const amountKobo = amount * 100;
     const reference = `jv_${nanoid(10)}`;
 
+    // Verify wallet exists
+    const wallet = await queryWithRetry(() =>
+      db.query.wallets.findFirst({
+        where: (wallets, { eq }) => eq(wallets.userId, session.userId)
+      })
+    );
+
+    if (!wallet) {
+      return NextResponse.json(
+        { message: "Wallet not found. Please try logging out and back in." },
+        { status: 404 }
+      );
+    }
+
     await queryWithRetry(() =>
       db.insert(walletTransactions).values({
         id: nanoid(),
@@ -69,7 +83,7 @@ export async function POST(request: Request) {
     console.error("Paystack initialization error:", error);
     const message = getFriendlyErrorMessage(
       error,
-      "We couldn’t start the payment. Please try again in a few minutes."
+      "We couldn't start the payment. Please try again in a few minutes."
     );
     return NextResponse.json({ message }, { status: 500 });
   }
