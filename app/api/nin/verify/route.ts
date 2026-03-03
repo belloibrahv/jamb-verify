@@ -18,7 +18,7 @@ const schema = z.object({
 
 const VERIFICATION_FEE = 50000; // kobo
 
-async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+async function queryWithRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
   for (let i = 0; i <= retries; i++) {
     try {
       return await fn();

@@ -16,7 +16,7 @@ const schema = z.object({
   password: z.string().min(6)
 });
 
-async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+async function queryWithRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
   for (let i = 0; i <= retries; i++) {
     try {
       return await fn();
