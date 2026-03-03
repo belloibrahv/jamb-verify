@@ -12,14 +12,27 @@ const schema = z.object({
   password: z.string().min(6)
 });
 
+async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+    }
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = schema.parse(body);
 
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, data.email)
-    });
+    const user = await queryWithRetry(() =>
+      db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.email, data.email)
+      })
+    );
 
     if (!user) {
       return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });

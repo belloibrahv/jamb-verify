@@ -18,6 +18,17 @@ const schema = z.object({
 
 const VERIFICATION_FEE = 50000; // kobo
 
+async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+    }
+  }
+}
+
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
@@ -43,9 +54,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const wallet = await db.query.wallets.findFirst({
-      where: (wallets, { eq }) => eq(wallets.userId, session.userId)
-    });
+    const wallet = await queryWithRetry(() =>
+      db.query.wallets.findFirst({
+        where: (wallets, { eq }) => eq(wallets.userId, session.userId)
+      })
+    );
 
     if (!wallet || wallet.balance < VERIFICATION_FEE) {
       return NextResponse.json(
@@ -58,31 +71,33 @@ export async function POST(request: Request) {
     const debitId = nanoid();
     const masked = maskNin(cleanNin);
 
-    await db.transaction(async (tx) => {
-      await tx.insert(ninVerifications).values({
-        id: verificationId,
-        userId: session.userId,
-        ninMasked: masked,
-        consent,
-        status: "pending"
-      });
+    await queryWithRetry(() =>
+      db.transaction(async (tx) => {
+        await tx.insert(ninVerifications).values({
+          id: verificationId,
+          userId: session.userId,
+          ninMasked: masked,
+          consent,
+          status: "pending"
+        });
 
-      await tx.insert(walletTransactions).values({
-        id: debitId,
-        userId: session.userId,
-        type: "debit",
-        status: "pending",
-        amount: VERIFICATION_FEE,
-        provider: "wallet",
-        description: "NIN verification",
-        ninMasked: masked
-      });
+        await tx.insert(walletTransactions).values({
+          id: debitId,
+          userId: session.userId,
+          type: "debit",
+          status: "pending",
+          amount: VERIFICATION_FEE,
+          provider: "wallet",
+          description: "NIN verification",
+          ninMasked: masked
+        });
 
-      await tx
-        .update(wallets)
-        .set({ balance: sql`${wallets.balance} - ${VERIFICATION_FEE}` })
-        .where(eq(wallets.id, wallet.id));
-    });
+        await tx
+          .update(wallets)
+          .set({ balance: sql`${wallets.balance} - ${VERIFICATION_FEE}` })
+          .where(eq(wallets.id, wallet.id));
+      })
+    );
 
     let response;
     try {

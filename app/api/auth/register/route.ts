@@ -16,14 +16,27 @@ const schema = z.object({
   password: z.string().min(6)
 });
 
+async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+    }
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = schema.parse(body);
 
-    const existing = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, data.email)
-    });
+    const existing = await queryWithRetry(() =>
+      db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.email, data.email)
+      })
+    );
 
     if (existing) {
       return NextResponse.json(
@@ -36,21 +49,23 @@ export async function POST(request: Request) {
     const userId = nanoid();
     const walletId = nanoid();
 
-    await db.transaction(async (tx) => {
-      await tx.insert(users).values({
-        id: userId,
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone,
-        passwordHash
-      });
-      await tx.insert(wallets).values({
-        id: walletId,
-        userId,
-        balance: 0,
-        currency: "NGN"
-      });
-    });
+    await queryWithRetry(() =>
+      db.transaction(async (tx) => {
+        await tx.insert(users).values({
+          id: userId,
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          passwordHash
+        });
+        await tx.insert(wallets).values({
+          id: walletId,
+          userId,
+          balance: 0,
+          currency: "NGN"
+        });
+      })
+    );
 
     await setSessionCookie({
       userId,

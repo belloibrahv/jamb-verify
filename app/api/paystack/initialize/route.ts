@@ -13,6 +13,17 @@ const schema = z.object({
   amount: z.number().min(500)
 });
 
+async function queryWithRetry(fn: () => Promise<any>, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+    }
+  }
+}
+
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
@@ -25,16 +36,18 @@ export async function POST(request: Request) {
     const amountKobo = amount * 100;
     const reference = `jv_${nanoid(10)}`;
 
-    await db.insert(walletTransactions).values({
-      id: nanoid(),
-      userId: session.userId,
-      type: "credit",
-      status: "pending",
-      amount: amountKobo,
-      provider: "paystack",
-      reference,
-      description: "Wallet funding"
-    });
+    await queryWithRetry(() =>
+      db.insert(walletTransactions).values({
+        id: nanoid(),
+        userId: session.userId,
+        type: "credit",
+        status: "pending",
+        amount: amountKobo,
+        provider: "paystack",
+        reference,
+        description: "Wallet funding"
+      })
+    );
 
     const init = await initializePaystackTransaction({
       email: session.email,
