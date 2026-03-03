@@ -86,18 +86,27 @@ export function DashboardClient() {
       }
 
       const popup = new Paystack();
+      const previousBalance = balance;
       
       // Handle successful payment
       popup.onClose = async () => {
+        console.log("Payment popup closed. Reference:", data.reference);
+        
         // Wait for webhook to process
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Verify payment with retries
+        let verifySuccess = false;
         for (let i = 0; i < 3; i++) {
           try {
+            console.log("Verify attempt", i + 1, "for reference:", data.reference);
             const verifyRes = await fetch(`/api/paystack/verify?reference=${data.reference}`);
             if (verifyRes.ok) {
+              console.log("Verify successful");
+              verifySuccess = true;
               break;
+            } else {
+              console.log("Verify failed with status:", verifyRes.status);
             }
           } catch (error) {
             console.error("Verify attempt failed:", error);
@@ -107,18 +116,25 @@ export function DashboardClient() {
           }
         }
         
+        if (!verifySuccess) {
+          console.warn("Payment verification failed after 3 attempts");
+        }
+        
         // Refresh balance with proper state checking
         let updated = false;
         for (let i = 0; i < 5; i++) {
           try {
+            console.log("Balance fetch attempt", i + 1);
             const res = await fetch("/api/wallet/balance", {
               cache: "no-store"
             });
             if (res.ok) {
-              const data = await res.json();
-              setBalance(data.balance);
-              // Check if balance actually increased
-              if (data.balance > 0) {
+              const balanceData = await res.json();
+              console.log("Current balance:", balanceData.balance, "Previous balance:", previousBalance);
+              setBalance(balanceData.balance);
+              // Check if balance actually increased from previous value
+              if (balanceData.balance > (previousBalance || 0)) {
+                console.log("Balance updated successfully");
                 updated = true;
                 break;
               }
@@ -133,6 +149,15 @@ export function DashboardClient() {
         
         if (!updated) {
           console.warn("Balance may not have updated. Please refresh manually.");
+          setResult({
+            status: "error",
+            message: "Payment completed but balance may not have updated. Please refresh."
+          });
+        } else {
+          setResult({
+            status: "success",
+            message: "Wallet funded successfully!"
+          });
         }
       };
 
