@@ -47,25 +47,34 @@ export async function POST(request: Request) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-paystack-signature");
 
+  console.log("Webhook received. Verifying signature...");
+
   if (!verifyPaystackSignature(rawBody, signature)) {
+    console.error("Invalid webhook signature");
     return NextResponse.json({ message: "Invalid signature" }, { status: 401 });
   }
 
   const event = JSON.parse(rawBody);
+  console.log("Webhook event:", event.event);
 
   if (event.event !== "charge.success") {
+    console.log("Ignoring non-charge.success event");
     return NextResponse.json({ received: true });
   }
 
   const reference = event.data?.reference as string | undefined;
   const amount = event.data?.amount as number | undefined;
 
+  console.log("Processing charge.success. Reference:", reference, "Amount:", amount);
+
   if (!reference || !amount) {
+    console.error("Invalid payload - missing reference or amount");
     return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
   }
 
   try {
     await updateWalletWithRetry(reference, amount);
+    console.log("Webhook processing completed successfully");
   } catch (error) {
     console.error("Webhook wallet update failed:", error);
     return NextResponse.json({ message: "Failed to update wallet" }, { status: 500 });
