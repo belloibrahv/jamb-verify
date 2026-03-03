@@ -7,6 +7,8 @@ import { getSession } from "@/lib/auth";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 
+export const runtime = "nodejs";
+
 const schema = z.object({
   amount: z.number().min(500)
 });

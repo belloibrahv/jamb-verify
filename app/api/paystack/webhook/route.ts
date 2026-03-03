@@ -4,6 +4,8 @@ import { walletTransactions, wallets } from "@/db/schema";
 import { verifyPaystackSignature } from "@/lib/paystack";
 import { eq, sql } from "drizzle-orm";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-paystack-signature");

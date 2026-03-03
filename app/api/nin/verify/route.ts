@@ -9,6 +9,8 @@ import { verifyNinWithYouVerify } from "@/lib/youverify";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { eq, sql } from "drizzle-orm";
 
+export const runtime = "nodejs";
+
 const schema = z.object({
   nin: z.string(),
   consent: z.boolean()

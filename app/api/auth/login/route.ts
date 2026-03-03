@@ -5,6 +5,8 @@ import { db } from "@/db/client";
 import { setSessionCookie } from "@/lib/auth";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 
+export const runtime = "nodejs";
+
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(6)

@@ -7,6 +7,8 @@ import { users, wallets } from "@/db/schema";
 import { setSessionCookie } from "@/lib/auth";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 
+export const runtime = "nodejs";
+
 const schema = z.object({
   fullName: z.string().min(3),
   email: z.string().email(),

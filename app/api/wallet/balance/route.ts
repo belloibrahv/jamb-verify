@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { getSession } from "@/lib/auth";
 
+export const runtime = "nodejs";
+
 export async function GET() {
   const session = await getSession();
   if (!session) {

@@ -4,6 +4,8 @@ import { walletTransactions, wallets } from "@/db/schema";
 import { verifyPaystackTransaction } from "@/lib/paystack";
 import { eq, sql } from "drizzle-orm";
 
+export const runtime = "nodejs";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const reference = searchParams.get("reference");
