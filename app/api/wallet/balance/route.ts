@@ -35,5 +35,9 @@ export async function GET() {
     return NextResponse.json({ message: "Wallet not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ balance: wallet.balance, currency: wallet.currency });
+  return NextResponse.json({ 
+    balance: wallet.balance, 
+    currency: wallet.currency,
+    updatedAt: wallet.updatedAt 
+  });
 }

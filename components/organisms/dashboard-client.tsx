@@ -57,12 +57,17 @@ export function DashboardClient() {
       }
 
       const popup = new Paystack();
-      popup.resumeTransaction(data.accessCode);
-
-      setTimeout(async () => {
+      
+      // Handle successful payment
+      popup.onClose = async () => {
+        // Wait a bit for webhook to process, then verify and refresh
+        await new Promise(resolve => setTimeout(resolve, 2000));
         await fetch(`/api/paystack/verify?reference=${data.reference}`);
-        loadBalance();
-      }, 6000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await loadBalance();
+      };
+
+      popup.resumeTransaction(data.accessCode);
     } catch (error) {
       setResult({
         status: "error",

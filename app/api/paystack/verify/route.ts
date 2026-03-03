@@ -37,27 +37,32 @@ export async function GET(request: Request) {
 
   const amount = verification.data.amount;
 
-  await queryWithRetry(() =>
-    db.transaction(async (tx) => {
-      const txn = await tx.query.walletTransactions.findFirst({
-        where: (table, { eq }) => eq(table.reference, reference)
-      });
+  try {
+    await queryWithRetry(() =>
+      db.transaction(async (tx) => {
+        const txn = await tx.query.walletTransactions.findFirst({
+          where: (table, { eq }) => eq(table.reference, reference)
+        });
 
-      if (!txn || txn.status === "completed") {
-        return;
-      }
+        if (!txn || txn.status === "completed") {
+          return;
+        }
 
-      await tx
-        .update(walletTransactions)
-        .set({ status: "completed" })
-        .where(eq(walletTransactions.id, txn.id));
+        await tx
+          .update(walletTransactions)
+          .set({ status: "completed" })
+          .where(eq(walletTransactions.id, txn.id));
 
-      await tx
-        .update(wallets)
-        .set({ balance: sql`${wallets.balance} + ${amount}` })
-        .where(eq(wallets.userId, txn.userId));
-    })
-  );
+        await tx
+          .update(wallets)
+          .set({ balance: sql`${wallets.balance} + ${amount}` })
+          .where(eq(wallets.userId, txn.userId));
+      })
+    );
+  } catch (error) {
+    console.error("Paystack verify error:", error);
+    return NextResponse.json({ message: "Failed to update wallet" }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }
