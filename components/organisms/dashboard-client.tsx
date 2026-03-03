@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Paystack from "@paystack/inline-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +45,9 @@ export function DashboardClient() {
     setLoading(true);
     setResult(null);
     try {
+      // Dynamically import Paystack only when needed (client-side only)
+      const { default: Paystack } = await import("@paystack/inline-js");
+      
       const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,7 +75,7 @@ export function DashboardClient() {
         status: "error",
         message: getFriendlyErrorMessage(
           error,
-          "We couldn’t start the payment. Please try again."
+          "We couldn't start the payment. Please try again."
         )
       });
     } finally {
@@ -105,7 +107,7 @@ export function DashboardClient() {
         status: "error",
         message: getFriendlyErrorMessage(
           error,
-          "We couldn’t complete the verification. Please try again."
+          "We couldn't complete the verification. Please try again."
         )
       });
     } finally {
