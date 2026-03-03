@@ -124,12 +124,12 @@ export async function POST(request: Request) {
     }
 
     const status = response.data?.status?.toLowerCase();
-    const details = response.data?.response;
+    const details = response.data;
 
     console.log("Verification check - Status:", status, "Has details:", !!details);
 
     if (status === "found" && details) {
-      const fullName = [details.first_name, details.middle_name, details.last_name]
+      const fullName = [details.firstName, details.middleName, details.lastName]
         .filter(Boolean)
         .join(" ")
         .trim();
@@ -139,9 +139,9 @@ export async function POST(request: Request) {
         .set({
           status: "success",
           fullName: fullName || null,
-          dateOfBirth: details.dob || null,
+          dateOfBirth: details.dateOfBirth || null,
           phone: details.mobile || null,
-          providerReference: response.data?.reference_id || null,
+          providerReference: details.id || null,
           rawResponse: response as unknown as Record<string, unknown>
         })
         .where(eq(ninVerifications.id, verificationId));
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         verificationId,
         data: {
           fullName,
-          dateOfBirth: details.dob,
+          dateOfBirth: details.dateOfBirth,
           phone: details.mobile
         }
       });

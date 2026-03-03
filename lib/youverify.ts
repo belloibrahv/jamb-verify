@@ -1,4 +1,4 @@
-const DEFAULT_BASE = "https://api.youverify.co/v1";
+const DEFAULT_BASE = "https://api.sandbox.youverify.co/v2";
 
 function getYouVerifyToken() {
   const token = process.env.YOUVERIFY_TOKEN;
@@ -13,19 +13,21 @@ function getYouVerifyBase() {
 }
 
 export type YouVerifyNinResponse = {
+  success: boolean;
+  statusCode: number;
   message: string;
-  status_code: number;
   data?: {
     id: string;
-    type: string;
-    reference_id: string;
     status: string;
-    response?: {
-      first_name?: string;
-      middle_name?: string;
-      last_name?: string;
-      dob?: string;
-      mobile?: string;
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    mobile?: string;
+    address?: {
+      state?: string;
+      lga?: string;
+      town?: string;
     };
   };
 };
@@ -33,17 +35,15 @@ export type YouVerifyNinResponse = {
 export async function verifyNinWithYouVerify(nin: string) {
   const token = getYouVerifyToken();
   const baseUrl = getYouVerifyBase();
-  const response = await fetch(`${baseUrl}/identities/candidates/check`, {
+  const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
     method: "POST",
     headers: {
       "token": token,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      report_type: "identity",
-      type: "nin",
-      reference: nin,
-      subject_consent: true
+      id: nin,
+      isSubjectConsent: true
     })
   });
 
