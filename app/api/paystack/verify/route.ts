@@ -7,14 +7,18 @@ import { eq, sql } from "drizzle-orm";
 export const runtime = "nodejs";
 
 async function queryWithRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  let lastError: unknown;
   for (let i = 0; i <= retries; i++) {
     try {
       return await fn();
     } catch (error) {
-      if (i === retries) throw error;
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+      lastError = error;
+      if (i < retries) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 100));
+      }
     }
   }
+  throw lastError;
 }
 
 export async function GET(request: Request) {
