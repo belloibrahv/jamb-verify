@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const schema = z.object({
   fullName: z.string().min(3, "Enter your full name"),
@@ -40,7 +41,12 @@ export default function RegisterPage() {
       }
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(
+        getFriendlyErrorMessage(
+          err,
+          "We couldn’t create your account. Please check your details and try again."
+        )
+      );
     } finally {
       setLoading(false);
     }

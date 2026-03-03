@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { formatNaira } from "@/lib/format";
 import { normalizeNin } from "@/lib/nin";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 import Link from "next/link";
 
 const feeKobo = 50000;
@@ -65,7 +66,10 @@ export function DashboardClient() {
     } catch (error) {
       setResult({
         status: "error",
-        message: error instanceof Error ? error.message : "Funding failed"
+        message: getFriendlyErrorMessage(
+          error,
+          "We couldn’t start the payment. Please try again."
+        )
       });
     } finally {
       setLoading(false);
@@ -94,7 +98,10 @@ export function DashboardClient() {
     } catch (error) {
       setResult({
         status: "error",
-        message: error instanceof Error ? error.message : "Verification failed"
+        message: getFriendlyErrorMessage(
+          error,
+          "We couldn’t complete the verification. Please try again."
+        )
       });
     } finally {
       setVerifying(false);

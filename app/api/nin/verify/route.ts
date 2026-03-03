@@ -6,6 +6,7 @@ import { ninVerifications, walletTransactions, wallets } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { isValidNin, maskNin, normalizeNin } from "@/lib/nin";
 import { verifyNinWithYouVerify } from "@/lib/youverify";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 import { eq, sql } from "drizzle-orm";
 
 const schema = z.object({
@@ -92,7 +93,11 @@ export async function POST(request: Request) {
         masked,
         reason: "Verification provider error"
       });
-      const message = error instanceof Error ? error.message : "Verification failed";
+      console.error("NIN verification provider error:", error);
+      const message = getFriendlyErrorMessage(
+        error,
+        "We couldn’t reach the verification provider. Your wallet has been refunded."
+      );
       return NextResponse.json({ message }, { status: 502 });
     }
 
@@ -146,7 +151,11 @@ export async function POST(request: Request) {
       { status: 404 }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Verification failed";
+    console.error("NIN verification error:", error);
+    const message = getFriendlyErrorMessage(
+      error,
+      "We couldn’t complete the verification. Please try again in a few minutes."
+    );
     return NextResponse.json({ message }, { status: 500 });
   }
 }

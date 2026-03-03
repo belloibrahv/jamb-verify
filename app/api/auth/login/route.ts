@@ -3,6 +3,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/db/client";
 import { setSessionCookie } from "@/lib/auth";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const schema = z.object({
   email: z.string().email(),
@@ -35,7 +36,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Login failed";
-    return NextResponse.json({ message }, { status: 400 });
+    console.error("Login error:", error);
+    const message = getFriendlyErrorMessage(
+      error,
+      "We couldn’t log you in. Please try again in a few minutes."
+    );
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

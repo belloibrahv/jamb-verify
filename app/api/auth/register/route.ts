@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { db } from "@/db/client";
 import { users, wallets } from "@/db/schema";
 import { setSessionCookie } from "@/lib/auth";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const schema = z.object({
   fullName: z.string().min(3),
@@ -57,7 +58,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Registration failed";
-    return NextResponse.json({ message }, { status: 400 });
+    console.error("Register error:", error);
+    const message = getFriendlyErrorMessage(
+      error,
+      "We couldn’t create your account. Please try again in a few minutes."
+    );
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

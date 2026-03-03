@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import { walletTransactions } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { initializePaystackTransaction } from "@/lib/paystack";
+import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const schema = z.object({
   amount: z.number().min(500)
@@ -46,7 +47,11 @@ export async function POST(request: Request) {
       reference: init.data.reference
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Initialization failed";
-    return NextResponse.json({ message }, { status: 400 });
+    console.error("Paystack initialization error:", error);
+    const message = getFriendlyErrorMessage(
+      error,
+      "We couldn’t start the payment. Please try again in a few minutes."
+    );
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
