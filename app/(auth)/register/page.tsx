@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getFriendlyErrorMessage } from "@/lib/utils";
+import { ShieldCheck, UserPlus, AlertCircle } from "lucide-react";
 
 const schema = z.object({
-  fullName: z.string().min(3, "Enter your full name"),
-  email: z.string().email(),
-  phone: z.string().min(8, "Enter a phone number"),
-  password: z.string().min(6, "Minimum 6 characters")
+  fullName: z.string().min(3, "Enter your full name (at least 3 characters)"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().min(8, "Enter a valid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters")
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -44,7 +45,7 @@ export default function RegisterPage() {
       setError(
         getFriendlyErrorMessage(
           err,
-          "We couldn’t create your account. Please check your details and try again."
+          "We couldn't create your account. Please check your details and try again."
         )
       );
     } finally {
@@ -53,64 +54,129 @@ export default function RegisterPage() {
   };
 
   return (
-    <Card className="w-full max-w-lg space-y-6 border-border/70 bg-white/90 p-8 shadow-card">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
-          Get started
-        </p>
-        <h1 className="font-heading text-3xl font-semibold">Create your JAMB Verify account</h1>
-        <p className="text-sm text-muted-foreground">
-          Fund your wallet and verify NINs instantly.
-        </p>
+    <Card className="w-full max-w-lg space-y-6 border-border/70 bg-white p-6 shadow-lg sm:p-8">
+      {/* Header */}
+      <div className="space-y-3 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <ShieldCheck className="h-7 w-7" />
+        </div>
+        <div className="space-y-1">
+          <h1 className="font-heading text-2xl font-bold sm:text-3xl">Create Account</h1>
+          <p className="text-sm text-muted-foreground">
+            Start verifying NINs for JAMB registration instantly
+          </p>
+        </div>
       </div>
+
+      {/* Form */}
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Full name</label>
-            <Input placeholder="Aisha Yusuf" {...form.register("fullName")} />
-            {form.formState.errors.fullName ? (
-              <p className="text-xs text-red-500">
+            <label className="text-sm font-medium">Full Name</label>
+            <Input 
+              placeholder="Aisha Yusuf" 
+              {...form.register("fullName")}
+              className="h-11"
+            />
+            {form.formState.errors.fullName && (
+              <p className="flex items-center gap-1 text-xs text-red-600">
+                <AlertCircle className="h-3 w-3" />
                 {form.formState.errors.fullName.message}
               </p>
-            ) : null}
+            )}
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Phone number</label>
-            <Input placeholder="08012345678" {...form.register("phone")} />
-            {form.formState.errors.phone ? (
-              <p className="text-xs text-red-500">
+            <label className="text-sm font-medium">Phone Number</label>
+            <Input 
+              placeholder="08012345678" 
+              {...form.register("phone")}
+              inputMode="tel"
+              className="h-11"
+            />
+            {form.formState.errors.phone && (
+              <p className="flex items-center gap-1 text-xs text-red-600">
+                <AlertCircle className="h-3 w-3" />
                 {form.formState.errors.phone.message}
               </p>
-            ) : null}
+            )}
           </div>
         </div>
+
         <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
-          <Input placeholder="you@example.com" {...form.register("email")} />
-          {form.formState.errors.email ? (
-            <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
-          ) : null}
+          <label className="text-sm font-medium">Email Address</label>
+          <Input 
+            type="email"
+            placeholder="you@example.com" 
+            {...form.register("email")}
+            className="h-11"
+          />
+          {form.formState.errors.email && (
+            <p className="flex items-center gap-1 text-xs text-red-600">
+              <AlertCircle className="h-3 w-3" />
+              {form.formState.errors.email.message}
+            </p>
+          )}
         </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Password</label>
-          <Input type="password" {...form.register("password")} />
-          {form.formState.errors.password ? (
-            <p className="text-xs text-red-500">
+          <Input 
+            type="password" 
+            placeholder="Create a strong password"
+            {...form.register("password")}
+            className="h-11"
+          />
+          {form.formState.errors.password && (
+            <p className="flex items-center gap-1 text-xs text-red-600">
+              <AlertCircle className="h-3 w-3" />
               {form.formState.errors.password.message}
             </p>
-          ) : null}
+          )}
         </div>
-        {error ? <p className="text-sm text-red-500">{error}</p> : null}
-        <Button type="submit" size="lg" className="w-full" disabled={loading}>
-          {loading ? "Creating account..." : "Create account"}
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-900">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <p>{error}</p>
+          </div>
+        )}
+
+        <Button 
+          type="submit" 
+          size="lg" 
+          className="w-full" 
+          disabled={loading}
+        >
+          {loading ? (
+            "Creating account..."
+          ) : (
+            <>
+              <UserPlus className="h-4 w-4" />
+              Create Account
+            </>
+          )}
         </Button>
       </form>
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-primary">
-          Sign in
-        </Link>
-      </p>
+
+      {/* Footer */}
+      <div className="space-y-4 text-center">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-2 text-muted-foreground">
+              Already have an account?
+            </span>
+          </div>
+        </div>
+        
+        <Button variant="outline" size="lg" className="w-full" asChild>
+          <Link href="/login">
+            Sign In
+          </Link>
+        </Button>
+      </div>
     </Card>
   );
 }

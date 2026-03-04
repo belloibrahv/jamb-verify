@@ -10,6 +10,17 @@ import { formatNaira } from "@/lib/format";
 import { normalizeNin } from "@/lib/nin";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import Link from "next/link";
+import { 
+  Wallet, 
+  Fingerprint, 
+  CheckCircle2, 
+  AlertCircle, 
+  RefreshCw, 
+  CreditCard,
+  ShieldCheck,
+  Info,
+  Sparkles
+} from "lucide-react";
 
 const feeKobo = 50000;
 
@@ -263,116 +274,291 @@ export function DashboardClient() {
     .replace(/(\d{3})(\d{4})(\d{0,4})/, "$1 $2 $3")
     .trim();
 
+  const hasInsufficientBalance = balance !== null && balance < feeKobo;
+  const canVerify = nin.length === 11 && consent && !hasInsufficientBalance && !verifying;
+
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="border-border/70 bg-white/90">
-          <CardHeader>
-            <CardTitle>Wallet funding</CardTitle>
+    <div className="space-y-6">
+      {/* Balance Overview Card - Mobile Optimized */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Wallet className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Wallet Balance
+                </p>
+                <p className="text-2xl font-bold sm:text-3xl">
+                  {balance === null ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    formatNaira(balance)
+                  )}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleRefreshBalance} 
+              disabled={refreshing}
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </Button>
+          </div>
+          
+          {hasInsufficientBalance && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <p>
+                Insufficient balance. You need at least {formatNaira(feeKobo)} to verify a NIN. 
+                Please fund your wallet below.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Main Action Cards - Responsive Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Wallet Funding Card */}
+        <Card className="border-border/70 bg-white shadow-sm">
+          <CardHeader className="space-y-1 pb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                <CreditCard className="h-4 w-4" />
+              </div>
+              <CardTitle className="text-lg">Fund Wallet</CardTitle>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Add money to verify NINs instantly
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                Current balance
-              </p>
-              <p className="text-2xl font-semibold">
-                {balance === null ? "--" : formatNaira(balance)}
-              </p>
-            </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Amount to fund (₦)</label>
+              <label className="text-sm font-medium">Amount (₦)</label>
               <Input
+                type="number"
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
+                placeholder="500"
                 inputMode="numeric"
+                className="text-lg"
+                min="500"
               />
-              <p className="text-xs text-muted-foreground">
-                Minimum wallet funding is ₦500. Use card or bank transfer via Paystack.
-              </p>
+              <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Info className="h-3 w-3 shrink-0 mt-0.5" />
+                <p>Minimum ₦500. Pay with card or bank transfer via Paystack.</p>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={handleFundWallet} disabled={loading || amountInvalid}>
-                {loading ? "Opening Paystack..." : "Fund wallet"}
-              </Button>
-              <Button variant="outline" onClick={handleRefreshBalance} disabled={refreshing}>
-                {refreshing ? "Refreshing..." : "Refresh balance"}
-              </Button>
+
+            {/* Quick Amount Buttons */}
+            <div className="grid grid-cols-3 gap-2">
+              {[500, 1000, 2000].map((quickAmount) => (
+                <Button
+                  key={quickAmount}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAmount(String(quickAmount))}
+                  className="text-xs"
+                >
+                  ₦{quickAmount}
+                </Button>
+              ))}
             </div>
+
+            <Button 
+              onClick={handleFundWallet} 
+              disabled={loading || amountInvalid}
+              size="lg"
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Opening Paystack...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4" />
+                  Fund Wallet
+                </>
+              )}
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="border-border/70 bg-white/90">
-          <CardHeader>
-            <CardTitle>NIN verification</CardTitle>
+        {/* NIN Verification Card */}
+        <Card className="border-border/70 bg-white shadow-sm">
+          <CardHeader className="space-y-1 pb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Fingerprint className="h-4 w-4" />
+              </div>
+              <CardTitle className="text-lg">Verify NIN</CardTitle>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Instant NIMC verification for JAMB
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Enter 11-digit NIN</label>
+              <label className="text-sm font-medium">11-digit NIN</label>
               <Input
                 value={formattedNin}
                 onChange={(event) => setNin(normalizeNin(event.target.value))}
                 placeholder="123 4567 8901"
                 inputMode="numeric"
+                maxLength={13}
+                className="text-lg tracking-wider"
               />
-              <p className="text-xs text-muted-foreground">
-                Verification fee: {formatNaira(feeKobo)} per request.
-              </p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  {nin.length}/11 digits
+                </span>
+                <span className="font-medium text-primary">
+                  Fee: {formatNaira(feeKobo)}
+                </span>
+              </div>
             </div>
-            <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-muted/40 p-4 text-sm">
+
+            {/* Consent Checkbox */}
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/70 bg-muted/30 p-4 text-sm transition-colors hover:bg-muted/50">
               <Checkbox
                 checked={consent}
                 onChange={(event) => setConsent(event.target.checked)}
+                className="mt-0.5"
               />
-              <span>
-                I consent to an identity check against NIMC records for this NIN.
+              <span className="flex-1">
+                I consent to an identity verification check against NIMC records for this NIN.
               </span>
             </label>
-            <Button onClick={handleVerify} disabled={verifying}>
-              {verifying ? "Verifying..." : "Verify NIN"}
+
+            <Button 
+              onClick={handleVerify} 
+              disabled={!canVerify}
+              size="lg"
+              className="w-full"
+            >
+              {verifying ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="h-4 w-4" />
+                  Verify NIN
+                </>
+              )}
             </Button>
-            {result ? (
-              <div
-                className={`rounded-2xl border p-4 text-sm ${
-                  result.status === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : "border-red-200 bg-red-50 text-red-700"
-                }`}
-              >
-                <p className="font-semibold">{result.message}</p>
-                {result.verificationId ? (
-                  <Link
-                    href={`/dashboard/receipts/${result.verificationId}`}
-                    className="mt-2 inline-flex text-sm font-semibold text-emerald-900"
-                  >
-                    View receipt
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
+
+            {!canVerify && nin.length === 11 && !consent && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                Please provide consent to continue
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-border/70 bg-white/90">
-        <CardHeader>
-          <CardTitle>Verification status guide</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>
-            Successful verifications show the candidate name, date of birth, and phone
-            number exactly as returned by NIMC.
-          </p>
-          <p>
-            Invalid NINs trigger an instant wallet refund. Your transaction history will
-            show masked NIN values only.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Badge>Wallet deduction</Badge>
-            <Badge>Auto refund</Badge>
-            <Badge>Receipt download</Badge>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Result Message */}
+      {result && (
+        <Card 
+          className={`border-2 ${
+            result.status === "success"
+              ? "border-emerald-200 bg-emerald-50"
+              : "border-red-200 bg-red-50"
+          }`}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              {result.status === "success" ? (
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
+              )}
+              <div className="flex-1 space-y-2">
+                <p className={`font-semibold ${
+                  result.status === "success" ? "text-emerald-900" : "text-red-900"
+                }`}>
+                  {result.message}
+                </p>
+                {result.verificationId && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="bg-white hover:bg-emerald-100"
+                  >
+                    <Link href={`/dashboard/receipts/${result.verificationId}`}>
+                      <Sparkles className="h-4 w-4" />
+                      View Receipt
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Info Cards - Responsive Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="border-border/50 bg-gradient-to-br from-blue-50 to-blue-100/50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">Instant Verification</p>
+                <p className="text-xs text-muted-foreground">
+                  Real-time NIMC data with name, DOB, and phone number
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 bg-gradient-to-br from-amber-50 to-amber-100/50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">Auto Refund</p>
+                <p className="text-xs text-muted-foreground">
+                  Invalid NINs trigger instant wallet refunds
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 bg-gradient-to-br from-emerald-50 to-emerald-100/50 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">JAMB Ready</p>
+                <p className="text-xs text-muted-foreground">
+                  Download receipt with verified identity data
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
