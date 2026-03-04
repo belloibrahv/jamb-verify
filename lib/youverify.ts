@@ -35,22 +35,37 @@ export type YouVerifyNinResponse = {
 export async function verifyNinWithYouVerify(nin: string) {
   const token = getYouVerifyToken();
   const baseUrl = getYouVerifyBase();
-  const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
-    method: "POST",
-    headers: {
-      "token": token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: nin,
-      isSubjectConsent: true
-    })
-  });
+  
+  console.log("[YOUVERIFY] Calling API with NIN:", nin.substring(0, 3) + "********");
+  console.log("[YOUVERIFY] Base URL:", baseUrl);
+  
+  try {
+    const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
+      method: "POST",
+      headers: {
+        "token": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: nin,
+        isSubjectConsent: true
+      })
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`YouVerify error: ${text}`);
+    console.log("[YOUVERIFY] Response status:", response.status);
+    console.log("[YOUVERIFY] Response headers:", Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("[YOUVERIFY] Error response:", text);
+      throw new Error(`YouVerify API error (${response.status}): ${text}`);
+    }
+
+    const data = await response.json();
+    console.log("[YOUVERIFY] Success response received");
+    return data as YouVerifyNinResponse;
+  } catch (error) {
+    console.error("[YOUVERIFY] Request failed:", error);
+    throw error;
   }
-
-  return (await response.json()) as YouVerifyNinResponse;
 }

@@ -127,14 +127,26 @@ export async function POST(request: Request) {
       console.log("[NIN] YouVerify response:", JSON.stringify(response, null, 2));
     } catch (error) {
       console.error("[NIN] YouVerify API error:", error);
-      await handleRefund({
-        verificationId,
-        debitId,
-        userId: session.userId,
-        walletId: wallet.id,
-        masked,
-        reason: "Verification provider error"
+      console.error("[NIN] Error details:", {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error)
       });
+      
+      // Refund the wallet
+      try {
+        await handleRefund({
+          verificationId,
+          debitId,
+          userId: session.userId,
+          walletId: wallet.id,
+          masked,
+          reason: "Verification provider error"
+        });
+        console.log("[NIN] Refund completed after API error");
+      } catch (refundError) {
+        console.error("[NIN] Refund failed:", refundError);
+      }
+      
       const message = getFriendlyErrorMessage(
         error,
         "We couldn't reach the verification provider. Your wallet has been refunded."
