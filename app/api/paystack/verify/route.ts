@@ -61,64 +61,61 @@ export async function GET(request: Request) {
   const amount = verification.data.amount;
   console.log("[VERIFY] Payment confirmed successful. Amount:", amount);
 
-  // Step 2: Update database with retries and better error handling
+  // Step 2: Update database without transactions (neon-http doesn't support them)
   try {
     await queryWithRetry(async () => {
-      return await db.transaction(async (tx) => {
-        console.log("[VERIFY] Looking for transaction with reference:", reference);
-        
-        // Find the transaction record
-        const txn = await tx.query.walletTransactions.findFirst({
-          where: (table, { eq }) => eq(table.reference, reference)
-        });
-
-        if (!txn) {
-          console.error("[VERIFY] Transaction record not found in database for reference:", reference);
-          // This is critical - the transaction should have been created during initialize
-          throw new Error(`Transaction record not found for reference: ${reference}. This indicates the payment was initialized outside our system or the database record was not created.`);
-        }
-
-        console.log("[VERIFY] Found transaction:", {
-          id: txn.id,
-          userId: txn.userId,
-          status: txn.status,
-          amount: txn.amount,
-          type: txn.type
-        });
-
-        // Check if already completed (idempotency)
-        if (txn.status === "completed") {
-          console.log("[VERIFY] Transaction already marked as completed. Skipping update.");
-          return { alreadyCompleted: true, userId: txn.userId };
-        }
-
-        // Update transaction status
-        console.log("[VERIFY] Updating transaction status to completed");
-        await tx
-          .update(walletTransactions)
-          .set({ status: "completed" })
-          .where(eq(walletTransactions.id, txn.id));
-
-        // Update wallet balance
-        console.log("[VERIFY] Updating wallet balance for user:", txn.userId, "Adding amount:", amount);
-        const updateResult = await tx
-          .update(wallets)
-          .set({ 
-            balance: sql`${wallets.balance} + ${amount}`,
-            updatedAt: sql`now()`
-          })
-          .where(eq(wallets.userId, txn.userId))
-          .returning();
-
-        if (updateResult.length === 0) {
-          console.error("[VERIFY] Wallet update returned no rows. Wallet may not exist for user:", txn.userId);
-          throw new Error(`Wallet not found for user: ${txn.userId}`);
-        }
-
-        console.log("[VERIFY] Wallet updated successfully. New balance:", updateResult[0].balance);
-        return { success: true, newBalance: updateResult[0].balance, userId: txn.userId };
+      console.log("[VERIFY] Looking for transaction with reference:", reference);
+      
+      // Find the transaction record
+      const txn = await db.query.walletTransactions.findFirst({
+        where: (table, { eq }) => eq(table.reference, reference)
       });
-    }, 3); // Increase retries to 3
+
+      if (!txn) {
+        console.error("[VERIFY] Transaction record not found in database for reference:", reference);
+        throw new Error(`Transaction record not found for reference: ${reference}. This indicates the payment was initialized outside our system or the database record was not created.`);
+      }
+
+      console.log("[VERIFY] Found transaction:", {
+        id: txn.id,
+        userId: txn.userId,
+        status: txn.status,
+        amount: txn.amount,
+        type: txn.type
+      });
+
+      // Check if already completed (idempotency)
+      if (txn.status === "completed") {
+        console.log("[VERIFY] Transaction already marked as completed. Skipping update.");
+        return { alreadyCompleted: true, userId: txn.userId };
+      }
+
+      // Update transaction status
+      console.log("[VERIFY] Updating transaction status to completed");
+      await db
+        .update(walletTransactions)
+        .set({ status: "completed" })
+        .where(eq(walletTransactions.id, txn.id));
+
+      // Update wallet balance
+      console.log("[VERIFY] Updating wallet balance for user:", txn.userId, "Adding amount:", amount);
+      const updateResult = await db
+        .update(wallets)
+        .set({ 
+          balance: sql`${wallets.balance} + ${amount}`,
+          updatedAt: sql`now()`
+        })
+        .where(eq(wallets.userId, txn.userId))
+        .returning();
+
+      if (updateResult.length === 0) {
+        console.error("[VERIFY] Wallet update returned no rows. Wallet may not exist for user:", txn.userId);
+        throw new Error(`Wallet not found for user: ${txn.userId}`);
+      }
+
+      console.log("[VERIFY] Wallet updated successfully. New balance:", updateResult[0].balance);
+      return { success: true, newBalance: updateResult[0].balance, userId: txn.userId };
+    }, 3);
 
     console.log("[VERIFY] Verification completed successfully");
     return NextResponse.json({ success: true, message: "Payment verified and wallet updated" });

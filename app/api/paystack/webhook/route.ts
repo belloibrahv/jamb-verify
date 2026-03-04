@@ -12,52 +12,50 @@ async function updateWalletWithRetry(reference: string, amount: number, retries 
     try {
       console.log(`[WEBHOOK] Update attempt ${i + 1}/${retries + 1} for reference:`, reference);
       
-      await db.transaction(async (tx) => {
-        const txn = await tx.query.walletTransactions.findFirst({
-          where: (table, { eq }) => eq(table.reference, reference)
-        });
-
-        if (!txn) {
-          console.error("[WEBHOOK] Transaction not found for reference:", reference);
-          throw new Error(`Transaction not found: ${reference}`);
-        }
-
-        console.log("[WEBHOOK] Found transaction:", {
-          id: txn.id,
-          userId: txn.userId,
-          status: txn.status,
-          amount: txn.amount
-        });
-
-        if (txn.status === "completed") {
-          console.log("[WEBHOOK] Transaction already completed. Skipping.");
-          return;
-        }
-
-        console.log("[WEBHOOK] Updating transaction status to completed");
-        await tx
-          .update(walletTransactions)
-          .set({ status: "completed" })
-          .where(eq(walletTransactions.id, txn.id));
-
-        console.log("[WEBHOOK] Updating wallet balance for user:", txn.userId);
-        const updateResult = await tx
-          .update(wallets)
-          .set({ 
-            balance: sql`${wallets.balance} + ${amount}`,
-            updatedAt: sql`now()`
-          })
-          .where(eq(wallets.userId, txn.userId))
-          .returning();
-
-        if (updateResult.length === 0) {
-          console.error("[WEBHOOK] Wallet not found for user:", txn.userId);
-          throw new Error(`Wallet not found for user: ${txn.userId}`);
-        }
-
-        console.log("[WEBHOOK] Wallet updated. New balance:", updateResult[0].balance);
+      // Find transaction (no transaction wrapper - neon-http doesn't support it)
+      const txn = await db.query.walletTransactions.findFirst({
+        where: (table, { eq }) => eq(table.reference, reference)
       });
-      
+
+      if (!txn) {
+        console.error("[WEBHOOK] Transaction not found for reference:", reference);
+        throw new Error(`Transaction not found: ${reference}`);
+      }
+
+      console.log("[WEBHOOK] Found transaction:", {
+        id: txn.id,
+        userId: txn.userId,
+        status: txn.status,
+        amount: txn.amount
+      });
+
+      if (txn.status === "completed") {
+        console.log("[WEBHOOK] Transaction already completed. Skipping.");
+        return;
+      }
+
+      console.log("[WEBHOOK] Updating transaction status to completed");
+      await db
+        .update(walletTransactions)
+        .set({ status: "completed" })
+        .where(eq(walletTransactions.id, txn.id));
+
+      console.log("[WEBHOOK] Updating wallet balance for user:", txn.userId);
+      const updateResult = await db
+        .update(wallets)
+        .set({ 
+          balance: sql`${wallets.balance} + ${amount}`,
+          updatedAt: sql`now()`
+        })
+        .where(eq(wallets.userId, txn.userId))
+        .returning();
+
+      if (updateResult.length === 0) {
+        console.error("[WEBHOOK] Wallet not found for user:", txn.userId);
+        throw new Error(`Wallet not found for user: ${txn.userId}`);
+      }
+
+      console.log("[WEBHOOK] Wallet updated. New balance:", updateResult[0].balance);
       console.log(`[WEBHOOK] Update successful on attempt ${i + 1}`);
       return;
     } catch (error) {
