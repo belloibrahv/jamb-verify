@@ -156,7 +156,7 @@ export function DashboardClient() {
       };
 
       popup.resumeTransaction(data.accessCode, {
-        onSuccess: async (transaction) => {
+        onSuccess: async (transaction: any) => {
           const reference = transaction?.reference || data.reference;
           await verifyAndRefresh(reference);
         },
@@ -166,7 +166,7 @@ export function DashboardClient() {
             message: "Payment cancelled. No funds were added."
           });
         },
-        onError: (error) => {
+        onError: (error: any) => {
           setResult({
             status: "error",
             message: error?.message || "Payment could not be completed."
