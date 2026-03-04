@@ -5,10 +5,10 @@ export const runtime = "nodejs";
 
 export async function POST() {
   await clearSessionCookie();
-  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"));
+  return NextResponse.json({ success: true, message: "Logged out successfully" });
 }
 
 export async function GET() {
   await clearSessionCookie();
-  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"));
+  return NextResponse.json({ success: true, message: "Logged out successfully" });
 }
