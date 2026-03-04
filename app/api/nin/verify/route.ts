@@ -164,6 +164,7 @@ export async function POST(request: Request) {
       // Check if it's a rate limit error
       const errorMessage = error instanceof Error ? error.message : String(error);
       const isRateLimit = errorMessage.includes("Too many requests") || errorMessage.includes("10 minutes");
+      const isInsufficientFunds = errorMessage.includes("insufficient funds") || errorMessage.includes("Insufficient fund");
       
       // Log failed verification
       await logNINVerification(
@@ -173,7 +174,7 @@ export async function POST(request: Request) {
         "failure",
         { 
           verificationId, 
-          reason: isRateLimit ? "Rate limit exceeded" : "Provider error",
+          reason: isRateLimit ? "Rate limit exceeded" : isInsufficientFunds ? "Provider insufficient funds" : "Provider error",
           error: errorMessage
         }
       );
@@ -186,7 +187,7 @@ export async function POST(request: Request) {
           userId: session.userId,
           walletId: wallet.id,
           masked,
-          reason: isRateLimit ? "Rate limit exceeded" : "Verification provider error"
+          reason: isRateLimit ? "Rate limit exceeded" : isInsufficientFunds ? "Provider service unavailable" : "Verification provider error"
         });
         console.log("[NIN] Refund completed after API error");
       } catch (refundError) {
@@ -198,6 +199,12 @@ export async function POST(request: Request) {
       }
       
       // Provide user-friendly message
+      if (isInsufficientFunds) {
+        return NextResponse.json({ 
+          message: "The verification service is temporarily unavailable. Your wallet has been refunded. Please try again later or contact support."
+        }, { status: 503 });
+      }
+      
       if (isRateLimit) {
         return NextResponse.json({ 
           message: "This NIN was recently verified. Please wait 10 minutes before trying again. Your wallet has been refunded."

@@ -1,4 +1,4 @@
-const DEFAULT_BASE = "https://api.sandbox.youverify.co/v2";
+const DEFAULT_BASE = "https://api.youverify.co/v2"; // Production URL
 
 function getYouVerifyToken() {
   const token = process.env.YOUVERIFY_TOKEN;
@@ -59,6 +59,13 @@ export async function verifyNinWithYouVerify(nin: string) {
       });
 
       console.log(`[YOUVERIFY] Response status (attempt ${attempt}):`, response.status);
+
+      // Handle insufficient funds (402)
+      if (response.status === 402) {
+        const data = await response.json();
+        console.error(`[YOUVERIFY] Insufficient funds (attempt ${attempt}):`, data.message);
+        throw new Error("YouVerify account has insufficient funds. Please contact support to top up your account.");
+      }
 
       // Handle rate limiting (429)
       if (response.status === 429) {
