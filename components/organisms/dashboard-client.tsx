@@ -277,6 +277,7 @@ export function DashboardClient() {
       });
       const data = await res.json();
       if (!res.ok) {
+        // Use the server's error message directly - it's already user-friendly
         throw new Error(data?.message || "Verification failed");
       }
       
@@ -293,13 +294,15 @@ export function DashboardClient() {
       // Refresh balance to show deduction
       loadBalance();
     } catch (error) {
+      // Display the actual error message from the server
+      const errorMessage = error instanceof Error ? error.message : String(error);
       setResult({
         status: "error",
-        message: getFriendlyErrorMessage(
-          error,
-          "We couldn't complete the verification. Please try again."
-        )
+        message: errorMessage
       });
+      
+      // Refresh balance in case wallet was refunded
+      loadBalance();
     } finally {
       setVerifying(false);
     }
