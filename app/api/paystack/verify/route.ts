@@ -26,71 +26,115 @@ export async function GET(request: Request) {
   const reference = searchParams.get("reference");
 
   if (!reference) {
+    console.error("[VERIFY] No reference provided");
     return NextResponse.json({ message: "Reference is required" }, { status: 400 });
   }
 
-  console.log("Verifying payment with reference:", reference);
+  console.log("[VERIFY] Starting verification for reference:", reference);
 
+  // Step 1: Verify with Paystack API
   let verification;
   try {
     verification = await verifyPaystackTransaction(reference);
-    console.log("Paystack verification response:", JSON.stringify(verification, null, 2));
+    console.log("[VERIFY] Paystack API response:", {
+      status: verification.status,
+      paymentStatus: verification.data.status,
+      amount: verification.data.amount,
+      reference: verification.data.reference
+    });
   } catch (error) {
-    console.error("Paystack verification failed:", error);
-    return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
+    console.error("[VERIFY] Paystack API call failed:", error);
+    return NextResponse.json({ 
+      message: "Payment verification failed", 
+      error: String(error) 
+    }, { status: 400 });
   }
 
   if (!verification.status || verification.data.status !== "success") {
-    console.log("Payment not successful. Status:", verification.data.status);
-    return NextResponse.json({ message: "Payment not successful" }, { status: 400 });
+    console.log("[VERIFY] Payment not successful. Status:", verification.data.status);
+    return NextResponse.json({ 
+      message: "Payment not successful", 
+      status: verification.data.status 
+    }, { status: 400 });
   }
 
   const amount = verification.data.amount;
-  console.log("Payment verified. Amount:", amount);
+  console.log("[VERIFY] Payment confirmed successful. Amount:", amount);
 
+  // Step 2: Update database with retries and better error handling
   try {
-    await queryWithRetry(() =>
-      db.transaction(async (tx) => {
-        console.log("Looking for transaction with reference:", reference);
+    await queryWithRetry(async () => {
+      return await db.transaction(async (tx) => {
+        console.log("[VERIFY] Looking for transaction with reference:", reference);
         
+        // Find the transaction record
         const txn = await tx.query.walletTransactions.findFirst({
           where: (table, { eq }) => eq(table.reference, reference)
         });
 
-        console.log("Found transaction:", txn ? { id: txn.id, userId: txn.userId, status: txn.status } : "NOT FOUND");
-
         if (!txn) {
-          console.error("Transaction not found for reference:", reference);
-          throw new Error(`Transaction not found for reference: ${reference}`);
+          console.error("[VERIFY] Transaction record not found in database for reference:", reference);
+          // This is critical - the transaction should have been created during initialize
+          throw new Error(`Transaction record not found for reference: ${reference}. This indicates the payment was initialized outside our system or the database record was not created.`);
         }
 
+        console.log("[VERIFY] Found transaction:", {
+          id: txn.id,
+          userId: txn.userId,
+          status: txn.status,
+          amount: txn.amount,
+          type: txn.type
+        });
+
+        // Check if already completed (idempotency)
         if (txn.status === "completed") {
-          console.log("Transaction already completed, skipping update");
-          return;
+          console.log("[VERIFY] Transaction already marked as completed. Skipping update.");
+          return { alreadyCompleted: true, userId: txn.userId };
         }
 
-        console.log("Updating transaction status to completed");
+        // Update transaction status
+        console.log("[VERIFY] Updating transaction status to completed");
         await tx
           .update(walletTransactions)
           .set({ status: "completed" })
           .where(eq(walletTransactions.id, txn.id));
 
-        console.log("Updating wallet balance for user:", txn.userId, "Amount:", amount);
-        await tx
+        // Update wallet balance
+        console.log("[VERIFY] Updating wallet balance for user:", txn.userId, "Adding amount:", amount);
+        const updateResult = await tx
           .update(wallets)
           .set({ 
             balance: sql`${wallets.balance} + ${amount}`,
             updatedAt: sql`now()`
           })
-          .where(eq(wallets.userId, txn.userId));
+          .where(eq(wallets.userId, txn.userId))
+          .returning();
 
-        console.log("Wallet updated successfully");
-      })
-    );
+        if (updateResult.length === 0) {
+          console.error("[VERIFY] Wallet update returned no rows. Wallet may not exist for user:", txn.userId);
+          throw new Error(`Wallet not found for user: ${txn.userId}`);
+        }
+
+        console.log("[VERIFY] Wallet updated successfully. New balance:", updateResult[0].balance);
+        return { success: true, newBalance: updateResult[0].balance, userId: txn.userId };
+      });
+    }, 3); // Increase retries to 3
+
+    console.log("[VERIFY] Verification completed successfully");
+    return NextResponse.json({ success: true, message: "Payment verified and wallet updated" });
+
   } catch (error) {
-    console.error("Paystack verify error:", error);
-    return NextResponse.json({ message: "Failed to update wallet", error: String(error) }, { status: 500 });
+    console.error("[VERIFY] Database update failed:", error);
+    console.error("[VERIFY] Error details:", {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
+    return NextResponse.json({ 
+      message: "Failed to update wallet", 
+      error: String(error),
+      reference 
+    }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }

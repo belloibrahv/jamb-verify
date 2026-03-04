@@ -89,69 +89,110 @@ export function DashboardClient() {
       const previousBalance = balance ?? 0;
 
       const verifyAndRefresh = async (reference: string) => {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        console.log("[PAYMENT] Starting verification for reference:", reference);
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for webhook
 
         let verifySuccess = false;
+        let verifyError = null;
+        
         for (let i = 0; i < 3; i++) {
           try {
+            console.log(`[PAYMENT] Verify attempt ${i + 1}/3 for reference:`, reference);
             const verifyRes = await fetch(
-              `/api/paystack/verify?reference=${reference}`
+              `/api/paystack/verify?reference=${reference}`,
+              { cache: "no-store" }
             );
+            
+            const verifyData = await verifyRes.json();
+            console.log(`[PAYMENT] Verify response (attempt ${i + 1}):`, {
+              status: verifyRes.status,
+              ok: verifyRes.ok,
+              data: verifyData
+            });
+            
             if (verifyRes.ok) {
+              console.log("[PAYMENT] Verification successful");
               verifySuccess = true;
               break;
+            } else {
+              verifyError = verifyData.message || `HTTP ${verifyRes.status}`;
+              console.warn(`[PAYMENT] Verify failed (attempt ${i + 1}):`, verifyError);
             }
           } catch (error) {
-            console.error("Verify attempt failed:", error);
+            verifyError = error instanceof Error ? error.message : String(error);
+            console.error(`[PAYMENT] Verify attempt ${i + 1} threw error:`, error);
           }
+          
           if (i < 2) {
+            console.log(`[PAYMENT] Waiting 1s before retry ${i + 2}...`);
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         }
 
+        // Refresh balance regardless of verify status
+        console.log("[PAYMENT] Starting balance refresh...");
         let updated = false;
+        let finalBalance = previousBalance;
+        
         for (let i = 0; i < 5; i++) {
           try {
+            console.log(`[PAYMENT] Balance fetch attempt ${i + 1}/5`);
             const res = await fetch("/api/wallet/balance", {
               cache: "no-store"
             });
+            
             if (res.ok) {
               const balanceData = await res.json();
+              console.log(`[PAYMENT] Balance fetched (attempt ${i + 1}):`, {
+                current: balanceData.balance,
+                previous: previousBalance,
+                increased: balanceData.balance > previousBalance
+              });
+              
               setBalance(balanceData.balance);
+              finalBalance = balanceData.balance;
+              
               if (balanceData.balance > previousBalance) {
+                console.log("[PAYMENT] Balance increased! Update successful.");
                 updated = true;
                 break;
               }
+            } else {
+              console.warn(`[PAYMENT] Balance fetch failed with status:`, res.status);
             }
           } catch (error) {
-            console.error("Balance fetch failed:", error);
+            console.error(`[PAYMENT] Balance fetch attempt ${i + 1} threw error:`, error);
           }
+          
           if (i < 4) {
+            console.log(`[PAYMENT] Waiting 800ms before next balance check...`);
             await new Promise((resolve) => setTimeout(resolve, 800));
           }
         }
 
+        // Determine final result
         if (!verifySuccess) {
+          console.error("[PAYMENT] Verification failed after 3 attempts. Error:", verifyError);
           setResult({
             status: "error",
-            message:
-              "Payment completed, but we could not confirm it yet. Please refresh your balance."
+            message: `Payment completed, but verification failed: ${verifyError}. Please contact support with reference: ${reference}`
           });
           return;
         }
 
         if (!updated) {
+          console.warn("[PAYMENT] Verification succeeded but balance didn't increase");
           setResult({
             status: "error",
-            message:
-              "Payment completed but balance may not have updated. Please refresh."
+            message: "Payment verified but balance not updated yet. Please refresh in a moment."
           });
           return;
         }
 
+        console.log("[PAYMENT] Payment flow completed successfully!");
         setResult({
           status: "success",
-          message: "Wallet funded successfully!"
+          message: `Wallet funded successfully! New balance: ${formatNaira(finalBalance)}`
         });
       };
 
