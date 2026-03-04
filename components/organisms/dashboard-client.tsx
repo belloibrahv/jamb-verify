@@ -114,7 +114,18 @@ export function DashboardClient() {
               { cache: "no-store" }
             );
             
-            const verifyData = await verifyRes.json();
+            // Handle non-JSON responses
+            const contentType = verifyRes.headers.get("content-type");
+            let verifyData;
+            
+            if (contentType && contentType.includes("application/json")) {
+              verifyData = await verifyRes.json();
+            } else {
+              const text = await verifyRes.text();
+              console.error(`[PAYMENT] Non-JSON response (attempt ${i + 1}):`, text.substring(0, 200));
+              throw new Error("Invalid response from server. Please try again.");
+            }
+            
             console.log(`[PAYMENT] Verify response (attempt ${i + 1}):`, {
               status: verifyRes.status,
               ok: verifyRes.ok,
