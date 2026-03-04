@@ -1,4 +1,4 @@
-import { DashboardSimple } from "@/components/organisms/dashboard-simple";
+import { DashboardClient } from "@/components/organisms/dashboard-client";
 
 export default function DashboardPage() {
   return (
@@ -9,7 +9,7 @@ export default function DashboardPage() {
           Fund your wallet and verify NINs for JAMB registration
         </p>
       </div>
-      <DashboardSimple />
+      <DashboardClient />
     </div>
   );
 }
