@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { History, LogOut, ShieldCheck, UserCircle, Wallet } from "lucide-react";
+import { History, ShieldCheck, UserCircle, Wallet } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/auth";
+import { LogoutButton } from "@/components/organisms/logout-button";
 
 export default async function DashboardLayout({
   children
@@ -70,17 +70,7 @@ export default async function DashboardLayout({
                 </div>
               </div>
 
-              <form action="/api/auth/logout" method="POST">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:bg-red-50"
-                  type="submit"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sign Out</span>
-                </Button>
-              </form>
+              <LogoutButton />
             </div>
           </div>
         </div>
