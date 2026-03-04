@@ -31,14 +31,14 @@ export default async function DashboardLayout({
             <nav className="hidden md:flex items-center gap-6">
               <Link 
                 href="/dashboard" 
-                className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
+                className="flex items-center gap-2 text-sm font-medium hover:text-primary"
               >
                 <Wallet className="h-4 w-4" />
                 Dashboard
               </Link>
               <Link 
                 href="/dashboard/transactions" 
-                className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
+                className="flex items-center gap-2 text-sm font-medium hover:text-primary"
               >
                 <History className="h-4 w-4" />
                 History
@@ -64,14 +64,14 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-4 py-3">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-medium hover:text-primary"
             >
               <Wallet className="h-4 w-4" />
               Dashboard
             </Link>
             <Link 
               href="/dashboard/transactions" 
-              className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-medium hover:text-primary"
             >
               <History className="h-4 w-4" />
               History
