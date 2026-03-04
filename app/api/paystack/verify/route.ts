@@ -97,7 +97,7 @@ export async function GET(request: Request) {
     // Check if transaction already exists
     const existingTx = await queryWithRetry(() =>
       db.query.walletTransactions.findFirst({
-        where: (transactions, { eq }) => eq(transactions.providerReference, reference)
+        where: (transactions, { eq }) => eq(transactions.reference, reference)
       })
     );
 
@@ -132,7 +132,7 @@ export async function GET(request: Request) {
         status: "completed",
         amount: amountInKobo,
         provider: "paystack",
-        providerReference: reference,
+        reference: reference,
         description: "Wallet funding via Paystack"
       })
     );
