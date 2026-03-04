@@ -7,7 +7,7 @@ import { getSession } from "@/lib/auth";
 import { isValidNin, maskNin, normalizeNin } from "@/lib/nin";
 import { verifyNinWithYouVerify } from "@/lib/youverify";
 import { getFriendlyErrorMessage } from "@/lib/utils";
-import { eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { rateLimitMiddleware, RATE_LIMITS } from "@/lib/rate-limit";
 import { logNINVerification, logAPIError } from "@/lib/audit-log";
 
@@ -82,6 +82,31 @@ export async function POST(request: Request) {
     }
 
     const masked = maskNin(cleanNin);
+
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const recentVerification = await db.query.ninVerifications.findFirst({
+      where: (table, { and, eq, gte }) =>
+        and(
+          eq(table.userId, session.userId),
+          eq(table.ninMasked, masked),
+          eq(table.status, "success"),
+          gte(table.createdAt, tenMinutesAgo)
+        ),
+      orderBy: (table, { desc }) => [desc(table.createdAt)]
+    });
+
+    if (recentVerification) {
+      return NextResponse.json({
+        status: "success",
+        verificationId: recentVerification.id,
+        data: {
+          fullName: recentVerification.fullName,
+          dateOfBirth: recentVerification.dateOfBirth,
+          phone: recentVerification.phone
+        },
+        cached: true
+      });
+    }
 
     console.log("[NIN] Checking wallet balance...");
     const wallet = await queryWithRetry(() =>
@@ -163,8 +188,22 @@ export async function POST(request: Request) {
       
       // Check if it's a rate limit error
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const isRateLimit = errorMessage.includes("Too many requests") || errorMessage.includes("10 minutes");
-      const isInsufficientFunds = errorMessage.includes("insufficient funds") || errorMessage.includes("Insufficient fund");
+      const providerStatus =
+        error instanceof Error && "statusCode" in error
+          ? (error as Error & { statusCode?: number }).statusCode
+          : undefined;
+      const isRateLimit =
+        providerStatus === 429 ||
+        errorMessage.includes("Too many requests") ||
+        errorMessage.includes("10 minutes");
+      const isInsufficientFunds =
+        providerStatus === 402 ||
+        errorMessage.includes("insufficient funds") ||
+        errorMessage.includes("Insufficient fund");
+      const isForbidden =
+        providerStatus === 403 || errorMessage.toLowerCase().includes("forbidden");
+      const isUnauthorized =
+        providerStatus === 401 || errorMessage.toLowerCase().includes("unauthorized");
       
       // Log failed verification
       await logNINVerification(
@@ -209,6 +248,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ 
           message: "This NIN was recently verified. Please wait 10 minutes before trying again. Your wallet has been refunded."
         }, { status: 429 });
+      }
+
+      if (isForbidden || isUnauthorized) {
+        return NextResponse.json(
+          {
+            message:
+              "Verification provider rejected this request. If you are testing in sandbox, use the allowed test NIN and try again, or switch to a production token."
+          },
+          { status: 403 }
+        );
       }
       
       const message = getFriendlyErrorMessage(

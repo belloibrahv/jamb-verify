@@ -32,6 +32,22 @@ export type YouVerifyNinResponse = {
   };
 };
 
+type YouVerifyError = Error & { statusCode?: number };
+
+function buildYouVerifyError(message: string, statusCode?: number): YouVerifyError {
+  const error = new Error(message) as YouVerifyError;
+  error.statusCode = statusCode;
+  return error;
+}
+
+async function safeJson(response: Response): Promise<Record<string, unknown> | null> {
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 export async function verifyNinWithYouVerify(nin: string) {
   const token = getYouVerifyToken();
   const baseUrl = getYouVerifyBase();
@@ -62,23 +78,39 @@ export async function verifyNinWithYouVerify(nin: string) {
 
       // Handle insufficient funds (402)
       if (response.status === 402) {
-        const data = await response.json();
-        console.error(`[YOUVERIFY] Insufficient funds (attempt ${attempt}):`, data.message);
-        throw new Error("YouVerify account has insufficient funds. Please contact support to top up your account.");
+        const data = await safeJson(response);
+        console.error(`[YOUVERIFY] Insufficient funds (attempt ${attempt}):`, data?.message);
+        throw buildYouVerifyError(
+          String(data?.message || "YouVerify account has insufficient funds."),
+          402
+        );
       }
 
       // Handle rate limiting (429)
       if (response.status === 429) {
-        const data = await response.json();
-        console.warn(`[YOUVERIFY] Rate limit hit (attempt ${attempt}):`, data.message);
-        throw new Error(data.message || "Too many requests. Please try again in 10 minutes.");
+        const data = await safeJson(response);
+        console.warn(`[YOUVERIFY] Rate limit hit (attempt ${attempt}):`, data?.message);
+        throw buildYouVerifyError(
+          String(data?.message || "Too many requests. Please try again in 10 minutes."),
+          429
+        );
+      }
+
+      // Handle forbidden / sandbox restrictions (403)
+      if (response.status === 403) {
+        const data = await safeJson(response);
+        console.warn(`[YOUVERIFY] Forbidden (attempt ${attempt}):`, data?.message);
+        throw buildYouVerifyError(String(data?.message || "Forbidden"), 403);
       }
 
       // Retry on 502/503 errors (server errors)
       if (response.status === 502 || response.status === 503) {
         const text = await response.text();
         console.warn(`[YOUVERIFY] Server error (attempt ${attempt}):`, text);
-        lastError = new Error(`YouVerify API error (${response.status}): ${text}`);
+        lastError = buildYouVerifyError(
+          `YouVerify API error (${response.status}): ${text}`,
+          response.status
+        );
         
         if (attempt < 3) {
           const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s
@@ -90,19 +122,27 @@ export async function verifyNinWithYouVerify(nin: string) {
 
       // Don't retry on other error codes (400, 401, 403, 404, etc.)
       if (!response.ok) {
-        const data = await response.json();
+        const data = await safeJson(response);
         console.error("[YOUVERIFY] Error response:", data);
-        const errorMsg = data.message || `API error (${response.status})`;
-        throw new Error(errorMsg);
+        const errorMsg = String(data?.message || `API error (${response.status})`);
+        throw buildYouVerifyError(errorMsg, response.status);
       }
 
-      const data = await response.json();
+      const data = (await safeJson(response)) as YouVerifyNinResponse | null;
+      if (!data) {
+        throw buildYouVerifyError("Invalid response from verification provider.");
+      }
+
+      if (data.success === false || data.statusCode >= 400) {
+        throw buildYouVerifyError(data.message || "Verification provider returned an error.");
+      }
+
       console.log(`[YOUVERIFY] Success response received (attempt ${attempt})`);
       return data as YouVerifyNinResponse;
       
     } catch (error) {
       // Network errors or JSON parse errors
-      if (error instanceof Error && !error.message.includes('YouVerify API error')) {
+      if (error instanceof Error && !error.message.includes("YouVerify API error")) {
         console.error(`[YOUVERIFY] Request failed (attempt ${attempt}):`, error);
         lastError = error;
         
