@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { SectionTitle } from "@/components/atoms/section-title";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, CreditCard, Fingerprint, FileCheck2 } from "lucide-react";
@@ -6,45 +9,153 @@ const steps = [
   {
     title: "Create account + fund wallet",
     description: "Sign up once, then fund your wallet with Paystack card or transfer.",
-    icon: CreditCard
+    icon: CreditCard,
+    color: "from-emerald-500 to-primary"
   },
   {
     title: "Enter your 11-digit NIN",
     description: "Consent is mandatory before we request your NIMC record.",
-    icon: Fingerprint
+    icon: Fingerprint,
+    color: "from-blue-500 to-accent"
   },
   {
     title: "Instant NIN confirmation",
     description: "₦500 is deducted, and a receipt downloads in seconds.",
-    icon: FileCheck2
+    icon: FileCheck2,
+    color: "from-orange-500 to-secondary"
   }
 ];
 
 export function HowItWorksSection() {
   return (
-    <section id="how" className="py-20">
-      <div className="container space-y-10">
-        <SectionTitle
-          eyebrow="How it works"
-          title="Three steps to a verified JAMB profile"
-          description="Keep the flow simple and predictable for candidates and staff supporting them."
-        />
-        <div className="grid gap-6 md:grid-cols-3">
+    <section id="how-it-works" className="py-24 relative overflow-hidden">
+      {/* Animated background */}
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3]
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      <div className="container relative z-10 space-y-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <SectionTitle
+            eyebrow="How it works"
+            title="Three steps to a verified JAMB profile"
+            description="Keep the flow simple and predictable for candidates and staff supporting them."
+          />
+        </motion.div>
+        
+        <div className="grid gap-8 md:grid-cols-3">
           {steps.map((step, index) => (
-            <Card key={step.title} className="relative space-y-4 border-border/60 bg-white/80">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
-                <step.icon className="h-5 w-5" />
-              </span>
-              <h3 className="text-lg font-semibold">{step.title}</h3>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
-              {index < steps.length - 1 ? (
-                <span className="absolute -right-3 top-10 hidden h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm md:flex">
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                </span>
-              ) : null}
-            </Card>
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+            >
+              <Card className="group relative overflow-hidden border-border/60 bg-white/80 hover:shadow-glow transition-all duration-300 h-full">
+                {/* Step number */}
+                <motion.div
+                  className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center"
+                  initial={{ scale: 0, rotate: -180 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
+                >
+                  <span className="text-4xl font-bold text-primary/30">
+                    {index + 1}
+                  </span>
+                </motion.div>
+                
+                <div className="relative space-y-5 p-8">
+                  {/* Animated icon */}
+                  <motion.div
+                    className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${step.color} text-white shadow-lg`}
+                    whileHover={{ scale: 1.1, rotate: 10 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <step.icon className="h-8 w-8" />
+                  </motion.div>
+                  
+                  <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                    {step.title}
+                  </h3>
+                  
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+                
+                {/* Arrow connector */}
+                {index < steps.length - 1 && (
+                  <motion.div
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg z-10"
+                    initial={{ scale: 0, x: -20 }}
+                    whileInView={{ scale: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.2 + 0.5 }}
+                  >
+                    <motion.div
+                      animate={{
+                        x: [0, 5, 0]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <ArrowRight className="h-5 w-5 text-primary" />
+                    </motion.div>
+                  </motion.div>
+                )}
+                
+                {/* Progress bar */}
+                <motion.div
+                  className={`absolute bottom-0 left-0 h-1.5 bg-gradient-to-r ${step.color}`}
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "100%" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: index * 0.2 + 0.4 }}
+                />
+              </Card>
+            </motion.div>
           ))}
         </div>
+        
+        {/* Call to action */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center"
+        >
+          <p className="text-lg text-muted-foreground mb-6">
+            Ready to get started? Create your account in less than a minute.
+          </p>
+          <motion.a
+            href="/register"
+            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-4 transition-all"
+            whileHover={{ scale: 1.05 }}
+          >
+            Start verifying now
+            <ArrowRight className="h-5 w-5" />
+          </motion.a>
+        </motion.div>
       </div>
     </section>
   );

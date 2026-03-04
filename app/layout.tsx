@@ -16,10 +16,45 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "NIN Verify for JAMB | Instant Identity Check",
+  title: "JAMB Verify | Instant NIN Verification for UTME Registration",
   description:
-    "Instantly verify your NIN against NIMC records, fund your wallet via Paystack, and download your JAMB-ready receipt in seconds.",
-  metadataBase: new URL("https://example.com")
+    "Verify your NIN instantly for JAMB registration. Fund wallet via Paystack, get NIMC-verified receipts in seconds. Fast, secure, NDPR-compliant NIN verification service.",
+  keywords: [
+    "JAMB NIN verification",
+    "UTME NIN check",
+    "Nigeria NIN verification",
+    "NIMC verification",
+    "JAMB registration",
+    "instant NIN verification"
+  ],
+  authors: [{ name: "JAMB Verify" }],
+  creator: "JAMB Verify",
+  publisher: "JAMB Verify",
+  metadataBase: new URL("https://jamb-verify.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: "https://jamb-verify.vercel.app",
+    title: "JAMB Verify | Instant NIN Verification",
+    description: "Verify your NIN instantly for JAMB registration. Fast, secure, NDPR-compliant.",
+    siteName: "JAMB Verify"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JAMB Verify | Instant NIN Verification",
+    description: "Verify your NIN instantly for JAMB registration. Fast, secure, NDPR-compliant."
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
+  }
 };
 
 export default function RootLayout({
@@ -29,6 +64,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sora.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        <link rel="icon" href="/icon" type="image/png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-icon" sizes="180x180" />
+      </head>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
