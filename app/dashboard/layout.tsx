@@ -30,7 +30,7 @@ export default async function DashboardLayout({
       <header className="sticky top-0 z-30 border-b border-border/70 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-between gap-4 py-4">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-glow">
                 <ShieldCheck className="h-5 w-5" />
               </div>

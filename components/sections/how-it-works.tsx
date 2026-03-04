@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { SectionTitle } from "@/components/atoms/section-title";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, CreditCard, Fingerprint, FileCheck2 } from "lucide-react";
+import { ArrowRight, CreditCard, Smartphone, FileCheck2, Info } from "lucide-react";
 
 const steps = [
   {
@@ -13,14 +13,15 @@ const steps = [
     color: "from-emerald-500 to-primary"
   },
   {
-    title: "Enter your 11-digit NIN",
-    description: "Consent is mandatory before we request your NIMC record.",
-    icon: Fingerprint,
-    color: "from-blue-500 to-accent"
+    title: "Generate your Virtual NIN (vNIN)",
+    description: "Dial *346*3*YourNIN*471335# or use the NIMC mobile app to get your secure vNIN token.",
+    icon: Smartphone,
+    color: "from-blue-500 to-accent",
+    highlight: true
   },
   {
-    title: "Instant NIN confirmation",
-    description: "₦500 is deducted, and a receipt downloads in seconds.",
+    title: "Verify & download receipt",
+    description: "Enter your vNIN, consent to verification, and get your receipt instantly for ₦500.",
     icon: FileCheck2,
     color: "from-orange-500 to-secondary"
   }
@@ -53,8 +54,49 @@ export function HowItWorksSection() {
           <SectionTitle
             eyebrow="How it works"
             title="Three steps to a verified JAMB profile"
-            description="Keep the flow simple and predictable for candidates and staff supporting them."
+            description="NIMC now requires Virtual NIN (vNIN) for enhanced security and privacy protection."
           />
+        </motion.div>
+
+        {/* vNIN Info Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mx-auto max-w-3xl"
+        >
+          <Card className="border-blue-200 bg-blue-50/80 backdrop-blur">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
+                  <Info className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-blue-900">
+                    Important: Virtual NIN (vNIN) Required
+                  </h3>
+                  <p className="text-sm text-blue-800 leading-relaxed">
+                    NIMC has upgraded to Virtual NIN for better security. Your vNIN is a temporary, 
+                    secure token that protects your actual NIN. It&apos;s valid for 72 hours and can be 
+                    used once per service.
+                  </p>
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <div className="text-sm">
+                      <span className="font-medium text-blue-900">USSD:</span>{" "}
+                      <code className="rounded bg-blue-100 px-2 py-1 text-blue-700">
+                        *346*3*YourNIN*471335#
+                      </code>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-blue-900">Enterprise Code:</span>{" "}
+                      <code className="rounded bg-blue-100 px-2 py-1 text-blue-700">471335</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </motion.div>
         
         <div className="grid gap-8 md:grid-cols-3">
@@ -66,7 +108,9 @@ export function HowItWorksSection() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
             >
-              <Card className="group relative overflow-hidden border-border/60 bg-white/80 hover:shadow-glow transition-all duration-300 h-full">
+              <Card className={`group relative overflow-hidden border-border/60 bg-white/80 hover:shadow-glow transition-all duration-300 h-full ${
+                step.highlight ? 'ring-2 ring-blue-200' : ''
+              }`}>
                 {/* Step number */}
                 <motion.div
                   className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center"
