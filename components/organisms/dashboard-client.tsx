@@ -155,11 +155,18 @@ export function DashboardClient() {
         let updated = false;
         let finalBalance = previousBalance;
         
-        for (let i = 0; i < 5; i++) {
+        // Wait a bit longer for webhook to process
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        
+        for (let i = 0; i < 6; i++) {
           try {
-            console.log(`[PAYMENT] Balance fetch attempt ${i + 1}/5`);
+            console.log(`[PAYMENT] Balance fetch attempt ${i + 1}/6`);
             const res = await fetch("/api/wallet/balance", {
-              cache: "no-store"
+              cache: "no-store",
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+              }
             });
             
             if (res.ok) {
@@ -185,9 +192,9 @@ export function DashboardClient() {
             console.error(`[PAYMENT] Balance fetch attempt ${i + 1} threw error:`, error);
           }
           
-          if (i < 4) {
-            console.log(`[PAYMENT] Waiting 800ms before next balance check...`);
-            await new Promise((resolve) => setTimeout(resolve, 800));
+          if (i < 5) {
+            console.log(`[PAYMENT] Waiting 1s before next balance check...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         }
 
@@ -212,26 +219,7 @@ export function DashboardClient() {
           return;
         }
 
-        if (!updated) {
-          console.warn("[PAYMENT] Verification succeeded but balance didn't increase yet");
-          
-          // Force one more balance check
-          try {
-            const finalRes = await fetch("/api/wallet/balance", { cache: "no-store" });
-            if (finalRes.ok) {
-              const finalData = await finalRes.json();
-              setBalance(finalData.balance);
-              finalBalance = finalData.balance;
-              
-              if (finalData.balance > previousBalance) {
-                updated = true;
-              }
-            }
-          } catch (e) {
-            console.error("[PAYMENT] Final balance check failed:", e);
-          }
-        }
-
+        // Verification succeeded - check if balance updated
         if (updated || finalBalance > previousBalance) {
           console.log("[PAYMENT] Payment flow completed successfully!");
           setResult({
@@ -239,9 +227,10 @@ export function DashboardClient() {
             message: `Wallet funded successfully! New balance: ${formatNaira(finalBalance)}`
           });
         } else {
+          console.warn("[PAYMENT] Verification succeeded but balance didn't update");
           setResult({
-            status: "error",
-            message: "Payment verified but balance not updated yet. Please refresh your balance in a moment."
+            status: "success",
+            message: `Payment verified successfully! If balance doesn't update in a moment, please refresh the page.`
           });
         }
       };

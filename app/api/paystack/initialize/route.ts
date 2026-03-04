@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { db } from "@/db/client";
 import { walletTransactions } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { initializePaystackTransaction } from "@/lib/paystack";
+import { initializePaystackPayment } from "@/lib/paystack";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -74,13 +74,14 @@ export async function POST(request: Request) {
 
     console.log("Transaction record created. Initializing Paystack...");
 
-    const init = await initializePaystackTransaction({
-      email: session.email,
-      amount: amountKobo,
-      reference,
-      metadata: { userId: session.userId },
-      channels: ["card", "bank_transfer"]
-    });
+    const init = await initializePaystackPayment(
+      session.email,
+      amountKobo,
+      { 
+        userId: session.userId,
+        reference
+      }
+    );
 
     console.log("Paystack initialized. Access code:", init.data.access_code);
 

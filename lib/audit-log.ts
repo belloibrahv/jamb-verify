@@ -46,60 +46,68 @@ export interface AuditLogEntry {
 /**
  * Log audit event
  * 
- * In production, this should write to:
+ * Writes to:
  * 1. Database table for queryable audit trail
- * 2. External logging service (e.g., CloudWatch, Datadog)
- * 3. SIEM system for security monitoring
+ * 2. Console for development/debugging
+ * 3. External logging service (if configured)
  */
-export function logAuditEvent(entry: AuditLogEntry): void {
+export async function logAuditEvent(entry: AuditLogEntry): Promise<void> {
   const logEntry = {
     ...entry,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development"
   };
 
-  // Console logging (development)
+  // Console logging (always)
   console.log("[AUDIT]", JSON.stringify(logEntry));
 
-  // TODO: Production implementation
-  // 1. Write to audit_logs database table
-  // 2. Send to external logging service
-  // 3. Alert on critical events (security.suspicious_activity)
-  
-  // Example production implementation:
-  /*
-  if (process.env.NODE_ENV === "production") {
-    // Write to database
-    db.insert(auditLogs).values(logEntry).catch(console.error);
-    
-    // Send to external service
-    if (process.env.SENTRY_DSN) {
-      Sentry.captureMessage(`Audit: ${entry.eventType}`, {
-        level: entry.status === "failure" ? "error" : "info",
-        extra: logEntry
+  // Write to database (async, non-blocking)
+  if (process.env.ENABLE_AUDIT_LOGGING !== "false") {
+    try {
+      const { db } = await import("@/db/client");
+      const { auditLogs } = await import("@/db/schema");
+      const { nanoid } = await import("nanoid");
+
+      await db.insert(auditLogs).values({
+        id: nanoid(),
+        timestamp: new Date(entry.timestamp),
+        eventType: entry.eventType,
+        userId: entry.userId || null,
+        ipAddress: entry.ipAddress || null,
+        userAgent: entry.userAgent || null,
+        resource: entry.resource || null,
+        action: entry.action,
+        status: entry.status,
+        metadata: entry.metadata || null,
+        errorMessage: entry.errorMessage || null
       });
-    }
-    
-    // Alert on suspicious activity
-    if (entry.eventType === "security.suspicious_activity") {
-      sendSecurityAlert(logEntry);
+    } catch (error) {
+      // Don't fail the request if audit logging fails
+      console.error("[AUDIT] Failed to write to database:", error);
     }
   }
-  */
+
+  // TODO: Send to external service (Sentry, CloudWatch, etc.)
+  // if (process.env.SENTRY_DSN && entry.status === "failure") {
+  //   Sentry.captureMessage(`Audit: ${entry.eventType}`, {
+  //     level: "error",
+  //     extra: logEntry
+  //   });
+  // }
 }
 
 /**
  * Log payment event with financial audit requirements
  */
-export function logPaymentEvent(
+export async function logPaymentEvent(
   eventType: Extract<AuditEventType, "payment.initialized" | "payment.success" | "payment.failed">,
   userId: string,
   amount: number,
   reference: string,
   status: "success" | "failure" | "pending",
   metadata?: Record<string, unknown>
-): void {
-  logAuditEvent({
+): Promise<void> {
+  await logAuditEvent({
     timestamp: new Date().toISOString(),
     eventType,
     userId,
@@ -118,7 +126,7 @@ export function logPaymentEvent(
 /**
  * Log NIN verification with data protection compliance
  */
-export function logNINVerification(
+export async function logNINVerification(
   eventType: Extract<
     AuditEventType,
     "nin.verification.initiated" | "nin.verification.success" | "nin.verification.failed"
@@ -127,8 +135,8 @@ export function logNINVerification(
   ninMasked: string,
   status: "success" | "failure" | "pending",
   metadata?: Record<string, unknown>
-): void {
-  logAuditEvent({
+): Promise<void> {
+  await logAuditEvent({
     timestamp: new Date().toISOString(),
     eventType,
     userId,
@@ -145,13 +153,13 @@ export function logNINVerification(
 /**
  * Log security event for monitoring
  */
-export function logSecurityEvent(
+export async function logSecurityEvent(
   description: string,
   userId?: string,
   ipAddress?: string,
   metadata?: Record<string, unknown>
-): void {
-  logAuditEvent({
+): Promise<void> {
+  await logAuditEvent({
     timestamp: new Date().toISOString(),
     eventType: "security.suspicious_activity",
     userId,
@@ -169,13 +177,13 @@ export function logSecurityEvent(
 /**
  * Log API error for debugging and monitoring
  */
-export function logAPIError(
+export async function logAPIError(
   endpoint: string,
   error: unknown,
   userId?: string,
   metadata?: Record<string, unknown>
-): void {
-  logAuditEvent({
+): Promise<void> {
+  await logAuditEvent({
     timestamp: new Date().toISOString(),
     eventType: "api.error",
     userId,

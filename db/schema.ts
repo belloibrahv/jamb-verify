@@ -79,3 +79,43 @@ export const ninVerifications = pgTable("nin_verifications", {
   rawResponse: jsonb("raw_response"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
+
+export const auditEventType = pgEnum("audit_event_type", [
+  "user.registered",
+  "user.login",
+  "user.logout",
+  "wallet.funded",
+  "wallet.debited",
+  "wallet.refunded",
+  "nin.verification.initiated",
+  "nin.verification.success",
+  "nin.verification.failed",
+  "payment.initialized",
+  "payment.success",
+  "payment.failed",
+  "webhook.received",
+  "webhook.processed",
+  "webhook.failed",
+  "api.error",
+  "security.suspicious_activity"
+]);
+
+export const auditStatus = pgEnum("audit_status", [
+  "success",
+  "failure",
+  "pending"
+]);
+
+export const auditLogs = pgTable("audit_logs", {
+  id: text("id").primaryKey(),
+  timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
+  eventType: auditEventType("event_type").notNull(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  resource: text("resource"),
+  action: text("action").notNull(),
+  status: auditStatus("status").notNull(),
+  metadata: jsonb("metadata"),
+  errorMessage: text("error_message")
+});
