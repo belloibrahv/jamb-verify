@@ -39,33 +39,71 @@ export async function verifyNinWithYouVerify(nin: string) {
   console.log("[YOUVERIFY] Calling API with NIN:", nin.substring(0, 3) + "********");
   console.log("[YOUVERIFY] Base URL:", baseUrl);
   
-  try {
-    const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
-      method: "POST",
-      headers: {
-        "token": token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: nin,
-        isSubjectConsent: true
-      })
-    });
+  let lastError: unknown;
+  
+  // Retry up to 3 times for 502/503 errors (sandbox API instability)
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`[YOUVERIFY] Attempt ${attempt}/3`);
+      
+      const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
+        method: "POST",
+        headers: {
+          "token": token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: nin,
+          isSubjectConsent: true
+        })
+      });
 
-    console.log("[YOUVERIFY] Response status:", response.status);
-    console.log("[YOUVERIFY] Response headers:", Object.fromEntries(response.headers.entries()));
+      console.log(`[YOUVERIFY] Response status (attempt ${attempt}):`, response.status);
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("[YOUVERIFY] Error response:", text);
-      throw new Error(`YouVerify API error (${response.status}): ${text}`);
+      // Retry on 502/503 errors (server errors)
+      if (response.status === 502 || response.status === 503) {
+        const text = await response.text();
+        console.warn(`[YOUVERIFY] Server error (attempt ${attempt}):`, text);
+        lastError = new Error(`YouVerify API error (${response.status}): ${text}`);
+        
+        if (attempt < 3) {
+          const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s
+          console.log(`[YOUVERIFY] Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+
+      // Don't retry on other error codes (400, 401, 404, etc.)
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("[YOUVERIFY] Error response:", text);
+        throw new Error(`YouVerify API error (${response.status}): ${text}`);
+      }
+
+      const data = await response.json();
+      console.log(`[YOUVERIFY] Success response received (attempt ${attempt})`);
+      return data as YouVerifyNinResponse;
+      
+    } catch (error) {
+      // Network errors or JSON parse errors
+      if (error instanceof Error && !error.message.includes('YouVerify API error')) {
+        console.error(`[YOUVERIFY] Request failed (attempt ${attempt}):`, error);
+        lastError = error;
+        
+        if (attempt < 3) {
+          const delay = Math.pow(2, attempt - 1) * 1000;
+          console.log(`[YOUVERIFY] Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      } else {
+        // API errors (non-502/503) - don't retry
+        throw error;
+      }
     }
-
-    const data = await response.json();
-    console.log("[YOUVERIFY] Success response received");
-    return data as YouVerifyNinResponse;
-  } catch (error) {
-    console.error("[YOUVERIFY] Request failed:", error);
-    throw error;
   }
+  
+  console.error("[YOUVERIFY] All retry attempts failed");
+  throw lastError;
 }
