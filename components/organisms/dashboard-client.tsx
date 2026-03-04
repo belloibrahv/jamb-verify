@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatNaira } from "@/lib/format";
-import { normalizeNin } from "@/lib/nin";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const feeKobo = 50000;
@@ -45,10 +44,12 @@ export function DashboardClient() {
   const [nin, setNin] = useState("");
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [showVNinHelp, setShowVNinHelp] = useState(false);
   const [result, setResult] = useState<{
-    status: "success" | "error";
+    status: "success" | "error" | "info";
     message: string;
     verificationId?: string;
+    requiresVNin?: boolean;
   } | null>(null);
 
   const loadBalance = async () => {
@@ -173,16 +174,29 @@ export function DashboardClient() {
         body: JSON.stringify({ nin, consent })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Verification failed");
-
-      setNin("");
-      setConsent(false);
-      setResult({
-        status: "success",
-        message: "NIN verified successfully!",
-        verificationId: data.verificationId
-      });
-      loadBalance();
+      if (!res.ok) {
+        // Check if vNIN is required
+        if (data.requiresVNin) {
+          setResult({
+            status: "info",
+            message: data.message,
+            requiresVNin: true
+          });
+          setShowVNinHelp(true);
+        } else {
+          throw new Error(data?.message || "Verification failed");
+        }
+      } else {
+        setNin("");
+        setConsent(false);
+        setShowVNinHelp(false);
+        setResult({
+          status: "success",
+          message: "NIN verified successfully!",
+          verificationId: data.verificationId
+        });
+        loadBalance();
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       setResult({ status: "error", message: errorMessage });
@@ -192,11 +206,9 @@ export function DashboardClient() {
     }
   };
 
-  const formattedNin = normalizeNin(nin)
-    .replace(/(\d{3})(\d{4})(\d{0,4})/, "$1 $2 $3")
-    .trim();
+  const formattedNin = nin.toUpperCase().replace(/\s/g, "");
   const hasInsufficientBalance = balance !== null && balance < feeKobo;
-  const canVerify = nin.length === 11 && consent && !hasInsufficientBalance && !verifying;
+  const canVerify = nin.length >= 11 && consent && !hasInsufficientBalance && !verifying;
   const verificationsLeft = balance === null ? null : Math.floor(balance / feeKobo);
 
   return (
@@ -365,18 +377,54 @@ export function DashboardClient() {
 
               <div className="space-y-3">
                 <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Virtual NIN (vNIN)</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowVNinHelp(!showVNinHelp)}
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                    >
+                      <Info className="h-3 w-3" />
+                      How to get vNIN?
+                    </button>
+                  </div>
                   <Input
                     value={formattedNin}
-                    onChange={(e) => setNin(normalizeNin(e.target.value))}
-                    placeholder="Enter 11-digit NIN"
-                    maxLength={13}
-                    className="h-12 text-lg tracking-wider"
+                    onChange={(e) => setNin(e.target.value)}
+                    placeholder="Enter vNIN (e.g., YV1234567890ABCD)"
+                    maxLength={16}
+                    className="h-12 text-base tracking-wider font-mono"
                   />
                   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{nin.length}/11 digits</span>
+                    <span>{nin.length}/16 characters</span>
                     <span className="font-medium">Fee: {formatNaira(feeKobo)}</span>
                   </div>
                 </div>
+
+                {showVNinHelp && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="rounded-lg bg-blue-50 border border-blue-200 p-4"
+                  >
+                    <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      How to Generate Your vNIN
+                    </h4>
+                    <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                      <li>Download the NIMC Mobile App or dial <strong>*346*3*YourNIN*471335#</strong></li>
+                      <li>Select &quot;Generate vNIN&quot;</li>
+                      <li>Choose &quot;JAMB Verify&quot; or enter enterprise code: <strong>471335</strong></li>
+                      <li>Your vNIN will be sent via SMS (valid for 72 hours)</li>
+                      <li>Enter the vNIN above to verify</li>
+                    </ol>
+                    <p className="text-xs text-blue-700 mt-3 flex items-start gap-1">
+                      <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span>Note: Each vNIN can only be used once and expires after 72 hours.</span>
+                    </p>
+                  </motion.div>
+                )}
 
                 <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-white/70 p-4 cursor-pointer transition hover:bg-muted/60">
                   <input
@@ -408,20 +456,30 @@ export function DashboardClient() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card
                 className={`border-0 ${
-                  result.status === "success" ? "bg-emerald-50" : "bg-red-50"
+                  result.status === "success" 
+                    ? "bg-emerald-50" 
+                    : result.status === "info"
+                    ? "bg-blue-50"
+                    : "bg-red-50"
                 }`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     {result.status === "success" ? (
                       <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                    ) : result.status === "info" ? (
+                      <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
                     ) : (
                       <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
                     )}
                     <div className="flex-1">
                       <p
                         className={`font-medium ${
-                          result.status === "success" ? "text-emerald-900" : "text-red-900"
+                          result.status === "success" 
+                            ? "text-emerald-900" 
+                            : result.status === "info"
+                            ? "text-blue-900"
+                            : "text-red-900"
                         }`}
                       >
                         {result.message}
@@ -521,17 +579,23 @@ export function DashboardClient() {
                   <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     1
                   </span>
-                  Fund your wallet to cover verification fees.
+                  Generate your Virtual NIN (vNIN) using NIMC app or USSD.
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     2
                   </span>
-                  Submit the NIN and consent to run the check.
+                  Fund your wallet to cover verification fees.
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     3
+                  </span>
+                  Submit the vNIN and consent to run the check.
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    4
                   </span>
                   Download the receipt for JAMB registration.
                 </div>

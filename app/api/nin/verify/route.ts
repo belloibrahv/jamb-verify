@@ -4,10 +4,10 @@ import { nanoid } from "nanoid";
 import { db } from "@/db/client";
 import { ninVerifications, walletTransactions, wallets } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { isValidNin, maskNin, normalizeNin } from "@/lib/nin";
+import { maskVNin, normalizeVNin, getInputType } from "@/lib/nin";
 import { verifyNinWithYouVerify } from "@/lib/youverify";
 import { getFriendlyErrorMessage } from "@/lib/utils";
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { rateLimitMiddleware, RATE_LIMITS } from "@/lib/rate-limit";
 import { logNINVerification, logAPIError } from "@/lib/audit-log";
 
@@ -72,16 +72,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanNin = normalizeNin(nin);
-    if (!isValidNin(cleanNin)) {
-      console.log("[NIN] Invalid NIN format:", cleanNin.length, "digits");
+    // Detect input type and normalize accordingly
+    const inputType = getInputType(nin);
+    
+    if (inputType === "invalid") {
+      console.log("[NIN] Invalid input format");
       return NextResponse.json(
-        { message: "Please enter a valid 11-digit NIN" },
+        { message: "Please enter a valid 11-digit NIN or 16-character Virtual NIN (vNIN)" },
         { status: 400 }
       );
     }
 
-    const masked = maskNin(cleanNin);
+    // Handle regular NIN input - guide user to use vNIN
+    if (inputType === "nin") {
+      console.log("[NIN] Regular NIN detected - vNIN required");
+      return NextResponse.json(
+        { 
+          message: "NIMC now requires Virtual NIN (vNIN) for verification. Please generate your vNIN using the NIMC mobile app or dial *346*3*YourNIN*471335# and enter it here.",
+          requiresVNin: true
+        },
+        { status: 400 }
+      );
+    }
+
+    // Process vNIN
+    const cleanInput = normalizeVNin(nin);
+    const masked = maskVNin(cleanInput);
+
+    console.log("[NIN] Processing vNIN:", masked);
 
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const recentVerification = await db.query.ninVerifications.findFirst({
@@ -177,7 +195,7 @@ export async function POST(request: Request) {
 
     let response;
     try {
-      response = await verifyNinWithYouVerify(cleanNin);
+      response = await verifyNinWithYouVerify(cleanInput);
       console.log("[NIN] YouVerify response:", JSON.stringify(response, null, 2));
     } catch (error) {
       console.error("[NIN] YouVerify API error:", error);

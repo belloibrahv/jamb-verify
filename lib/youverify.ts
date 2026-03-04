@@ -1,4 +1,4 @@
-const DEFAULT_BASE = "https://api.youverify.co/v2"; // Production URL
+const DEFAULT_BASE = "https://api.youverify.co"; // Production URL
 
 function getYouVerifyToken() {
   const token = process.env.YOUVERIFY_TOKEN;
@@ -12,6 +12,7 @@ function getYouVerifyBase() {
   return process.env.YOUVERIFY_BASE_URL || DEFAULT_BASE;
 }
 
+// Response type for v2 API (vNIN endpoint)
 export type YouVerifyNinResponse = {
   success: boolean;
   statusCode: number;
@@ -24,10 +25,17 @@ export type YouVerifyNinResponse = {
     lastName?: string;
     dateOfBirth?: string;
     mobile?: string;
+    mobileIntFormat?: string;
+    gender?: string;
+    image?: string;
+    vNIN?: string;
+    idNumber?: string;
+    type?: string;
     address?: {
       state?: string;
       lga?: string;
       town?: string;
+      addressLine?: string;
     };
   };
 };
@@ -57,12 +65,13 @@ export async function verifyNinWithYouVerify(nin: string) {
   
   let lastError: unknown;
   
-  // Retry up to 3 times for 502/503 errors (sandbox API instability)
+  // Retry up to 3 times for 502/503 errors (API instability)
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       console.log(`[YOUVERIFY] Attempt ${attempt}/3`);
       
-      const response = await fetch(`${baseUrl}/api/identity/ng/nin`, {
+      // Use the correct v2 endpoint for vNIN verification
+      const response = await fetch(`${baseUrl}/v2/api/identity/ng/vnin`, {
         method: "POST",
         headers: {
           "token": token,
