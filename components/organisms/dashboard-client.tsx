@@ -86,55 +86,39 @@ export function DashboardClient() {
       }
 
       const popup = new Paystack();
-      const previousBalance = balance;
-      
-      // Handle successful payment
-      popup.onClose = async () => {
-        console.log("Payment popup closed. Reference:", data.reference);
-        
-        // Wait for webhook to process
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Verify payment with retries
+      const previousBalance = balance ?? 0;
+
+      const verifyAndRefresh = async (reference: string) => {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
         let verifySuccess = false;
         for (let i = 0; i < 3; i++) {
           try {
-            console.log("Verify attempt", i + 1, "for reference:", data.reference);
-            const verifyRes = await fetch(`/api/paystack/verify?reference=${data.reference}`);
+            const verifyRes = await fetch(
+              `/api/paystack/verify?reference=${reference}`
+            );
             if (verifyRes.ok) {
-              console.log("Verify successful");
               verifySuccess = true;
               break;
-            } else {
-              console.log("Verify failed with status:", verifyRes.status);
             }
           } catch (error) {
             console.error("Verify attempt failed:", error);
           }
           if (i < 2) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         }
-        
-        if (!verifySuccess) {
-          console.warn("Payment verification failed after 3 attempts");
-        }
-        
-        // Refresh balance with proper state checking
+
         let updated = false;
         for (let i = 0; i < 5; i++) {
           try {
-            console.log("Balance fetch attempt", i + 1);
             const res = await fetch("/api/wallet/balance", {
               cache: "no-store"
             });
             if (res.ok) {
               const balanceData = await res.json();
-              console.log("Current balance:", balanceData.balance, "Previous balance:", previousBalance);
               setBalance(balanceData.balance);
-              // Check if balance actually increased from previous value
-              if (balanceData.balance > (previousBalance || 0)) {
-                console.log("Balance updated successfully");
+              if (balanceData.balance > previousBalance) {
                 updated = true;
                 break;
               }
@@ -143,25 +127,52 @@ export function DashboardClient() {
             console.error("Balance fetch failed:", error);
           }
           if (i < 4) {
-            await new Promise(resolve => setTimeout(resolve, 800));
+            await new Promise((resolve) => setTimeout(resolve, 800));
           }
         }
-        
-        if (!updated) {
-          console.warn("Balance may not have updated. Please refresh manually.");
+
+        if (!verifySuccess) {
           setResult({
             status: "error",
-            message: "Payment completed but balance may not have updated. Please refresh."
+            message:
+              "Payment completed, but we could not confirm it yet. Please refresh your balance."
           });
-        } else {
-          setResult({
-            status: "success",
-            message: "Wallet funded successfully!"
-          });
+          return;
         }
+
+        if (!updated) {
+          setResult({
+            status: "error",
+            message:
+              "Payment completed but balance may not have updated. Please refresh."
+          });
+          return;
+        }
+
+        setResult({
+          status: "success",
+          message: "Wallet funded successfully!"
+        });
       };
 
-      popup.resumeTransaction(data.accessCode);
+      popup.resumeTransaction(data.accessCode, {
+        onSuccess: async (transaction) => {
+          const reference = transaction?.reference || data.reference;
+          await verifyAndRefresh(reference);
+        },
+        onCancel: () => {
+          setResult({
+            status: "error",
+            message: "Payment cancelled. No funds were added."
+          });
+        },
+        onError: (error) => {
+          setResult({
+            status: "error",
+            message: error?.message || "Payment could not be completed."
+          });
+        }
+      });
     } catch (error) {
       setResult({
         status: "error",
