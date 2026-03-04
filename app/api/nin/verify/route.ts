@@ -8,6 +8,8 @@ import { isValidNin, maskNin, normalizeNin } from "@/lib/nin";
 import { verifyNinWithYouVerify } from "@/lib/youverify";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { eq, sql } from "drizzle-orm";
+import { rateLimitMiddleware, RATE_LIMITS } from "@/lib/rate-limit";
+import { logNINVerification, logAPIError } from "@/lib/audit-log";
 
 export const runtime = "nodejs";
 
@@ -39,6 +41,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  // Apply rate limiting
+  const rateLimitResult = rateLimitMiddleware(
+    `nin-verify:${session.userId}`,
+    RATE_LIMITS.ninVerify,
+    "/api/nin/verify"
+  );
+  
+  if (rateLimitResult) {
+    return NextResponse.json(
+      { message: rateLimitResult.message },
+      { 
+        status: rateLimitResult.status,
+        headers: { "Retry-After": String(rateLimitResult.retryAfter) }
+      }
+    );
+  }
+
   console.log("[NIN] Verification request from user:", session.userId);
 
   try {
@@ -62,6 +81,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const masked = maskNin(cleanNin);
+
     console.log("[NIN] Checking wallet balance...");
     const wallet = await queryWithRetry(() =>
       db.query.wallets.findFirst({
@@ -79,9 +100,17 @@ export async function POST(request: Request) {
 
     const verificationId = nanoid();
     const debitId = nanoid();
-    const masked = maskNin(cleanNin);
 
     console.log("[NIN] Creating verification record and debiting wallet...");
+    
+    // Log verification initiated
+    await logNINVerification(
+      "nin.verification.initiated",
+      session.userId,
+      masked,
+      "pending",
+      { verificationId, amount: VERIFICATION_FEE }
+    );
     
     // Create verification record (no transaction - neon-http doesn't support it)
     await queryWithRetry(() =>
@@ -136,6 +165,19 @@ export async function POST(request: Request) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const isRateLimit = errorMessage.includes("Too many requests") || errorMessage.includes("10 minutes");
       
+      // Log failed verification
+      await logNINVerification(
+        "nin.verification.failed",
+        session.userId,
+        masked,
+        "failure",
+        { 
+          verificationId, 
+          reason: isRateLimit ? "Rate limit exceeded" : "Provider error",
+          error: errorMessage
+        }
+      );
+      
       // Refund the wallet
       try {
         await handleRefund({
@@ -149,6 +191,10 @@ export async function POST(request: Request) {
         console.log("[NIN] Refund completed after API error");
       } catch (refundError) {
         console.error("[NIN] Refund failed:", refundError);
+        await logAPIError("/api/nin/verify", refundError, session.userId, {
+          context: "refund_failed",
+          verificationId
+        });
       }
       
       // Provide user-friendly message
@@ -195,6 +241,15 @@ export async function POST(request: Request) {
         .set({ status: "completed" })
         .where(eq(walletTransactions.id, debitId));
 
+      // Log successful verification
+      await logNINVerification(
+        "nin.verification.success",
+        session.userId,
+        masked,
+        "success",
+        { verificationId, fullName }
+      );
+
       console.log("[NIN] Verification successful");
       return NextResponse.json({
         status: "success",
@@ -208,6 +263,16 @@ export async function POST(request: Request) {
     }
 
     console.log("[NIN] NIN not found - refunding wallet");
+    
+    // Log failed verification
+    await logNINVerification(
+      "nin.verification.failed",
+      session.userId,
+      masked,
+      "failure",
+      { verificationId, reason: "NIN not found" }
+    );
+    
     await handleRefund({
       verificationId,
       debitId,
@@ -227,6 +292,10 @@ export async function POST(request: Request) {
       console.error("[NIN] Error message:", error.message);
       console.error("[NIN] Error stack:", error.stack);
     }
+    
+    // Log API error
+    await logAPIError("/api/nin/verify", error, session.userId);
+    
     const message = getFriendlyErrorMessage(
       error,
       "We couldn't complete the verification. Please try again in a few minutes."

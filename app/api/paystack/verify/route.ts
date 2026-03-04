@@ -3,6 +3,8 @@ import { db } from "@/db/client";
 import { walletTransactions, wallets } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { eq, sql } from "drizzle-orm";
+import { rateLimitMiddleware, RATE_LIMITS } from "@/lib/rate-limit";
+import { logPaymentEvent, logAPIError } from "@/lib/audit-log";
 
 export const runtime = "nodejs";
 
@@ -25,6 +27,23 @@ export async function GET(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  // Apply rate limiting
+  const rateLimitResult = rateLimitMiddleware(
+    `payment-verify:${session.userId}`,
+    RATE_LIMITS.paymentVerify,
+    "/api/paystack/verify"
+  );
+  
+  if (rateLimitResult) {
+    return NextResponse.json(
+      { message: rateLimitResult.message },
+      { 
+        status: rateLimitResult.status,
+        headers: { "Retry-After": String(rateLimitResult.retryAfter) }
+      }
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -62,6 +81,16 @@ export async function GET(request: Request) {
     if (!paystackResponse.ok) {
       const errorText = await paystackResponse.text();
       console.error("[VERIFY] Paystack error response:", errorText);
+      
+      await logPaymentEvent(
+        "payment.failed",
+        session.userId,
+        0,
+        reference,
+        "failure",
+        { error: errorText, httpStatus: paystackResponse.status }
+      );
+      
       throw new Error(`Paystack verification failed: ${paystackResponse.status} - ${errorText}`);
     }
 
@@ -72,6 +101,16 @@ export async function GET(request: Request) {
       paystackData = JSON.parse(responseText);
     } catch (parseError) {
       console.error("[VERIFY] JSON parse error:", parseError);
+      
+      await logPaymentEvent(
+        "payment.failed",
+        session.userId,
+        0,
+        reference,
+        "failure",
+        { error: "JSON parse error" }
+      );
+      
       throw new Error("Invalid response from payment provider");
     }
 
@@ -152,6 +191,15 @@ export async function GET(request: Request) {
 
     console.log("[VERIFY] Verification completed successfully");
 
+    // Log successful payment
+    await logPaymentEvent(
+      "payment.success",
+      session.userId,
+      amountInKobo,
+      reference,
+      "success"
+    );
+
     return NextResponse.json({
       message: "Payment verified and wallet updated",
       reference,
@@ -165,6 +213,9 @@ export async function GET(request: Request) {
       message: errorMessage,
       stack: error instanceof Error ? error.stack : undefined
     });
+
+    // Log API error
+    await logAPIError("/api/paystack/verify", error, session.userId, { reference });
 
     return NextResponse.json(
       {

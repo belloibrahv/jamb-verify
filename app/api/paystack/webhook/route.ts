@@ -3,6 +3,7 @@ import { db } from "@/db/client";
 import { walletTransactions, wallets } from "@/db/schema";
 import { verifyPaystackSignature } from "@/lib/paystack";
 import { eq, sql } from "drizzle-orm";
+import { logAuditEvent } from "@/lib/audit-log";
 
 export const runtime = "nodejs";
 
@@ -81,8 +82,31 @@ export async function POST(request: Request) {
   console.log("[WEBHOOK] Received webhook request");
   console.log("[WEBHOOK] Signature present:", !!signature);
 
+  // Log webhook received
+  await logAuditEvent({
+    timestamp: new Date().toISOString(),
+    eventType: "webhook.received",
+    ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+    resource: "webhook",
+    action: "received",
+    status: "pending",
+    metadata: { hasSignature: !!signature }
+  });
+
   if (!verifyPaystackSignature(rawBody, signature)) {
     console.error("[WEBHOOK] Invalid signature. Rejecting request.");
+    
+    // Log failed webhook
+    await logAuditEvent({
+      timestamp: new Date().toISOString(),
+      eventType: "webhook.failed",
+      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+      resource: "webhook",
+      action: "signature_verification",
+      status: "failure",
+      errorMessage: "Invalid signature"
+    });
+    
     return NextResponse.json({ message: "Invalid signature" }, { status: 401 });
   }
 
@@ -115,6 +139,17 @@ export async function POST(request: Request) {
   try {
     await updateWalletWithRetry(reference, amount);
     console.log("[WEBHOOK] Wallet update completed successfully");
+    
+    // Log successful webhook processing
+    await logAuditEvent({
+      timestamp: new Date().toISOString(),
+      eventType: "webhook.processed",
+      resource: "webhook",
+      action: "charge_success",
+      status: "success",
+      metadata: { reference, amount }
+    });
+    
     return NextResponse.json({ received: true, processed: true });
   } catch (error) {
     console.error("[WEBHOOK] Wallet update failed:", error);
@@ -122,6 +157,18 @@ export async function POST(request: Request) {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error)
     });
+    
+    // Log failed webhook
+    await logAuditEvent({
+      timestamp: new Date().toISOString(),
+      eventType: "webhook.failed",
+      resource: "webhook",
+      action: "wallet_update",
+      status: "failure",
+      errorMessage: error instanceof Error ? error.message : String(error),
+      metadata: { reference, amount }
+    });
+    
     return NextResponse.json({ 
       message: "Failed to update wallet", 
       error: String(error) 

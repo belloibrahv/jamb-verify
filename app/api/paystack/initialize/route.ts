@@ -6,6 +6,8 @@ import { walletTransactions } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { initializePaystackPayment } from "@/lib/paystack";
 import { getFriendlyErrorMessage } from "@/lib/utils";
+import { rateLimitMiddleware, RATE_LIMITS } from "@/lib/rate-limit";
+import { logPaymentEvent, logAPIError } from "@/lib/audit-log";
 
 export const runtime = "nodejs";
 
@@ -32,6 +34,23 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  // Apply rate limiting
+  const rateLimitResult = rateLimitMiddleware(
+    `payment-init:${session.userId}`,
+    RATE_LIMITS.paymentInitialize,
+    "/api/paystack/initialize"
+  );
+
+  if (rateLimitResult) {
+    return NextResponse.json(
+      { message: rateLimitResult.message },
+      {
+        status: rateLimitResult.status,
+        headers: { "Retry-After": String(rateLimitResult.retryAfter) }
+      }
+    );
   }
 
   try {
@@ -77,10 +96,20 @@ export async function POST(request: Request) {
     const init = await initializePaystackPayment(
       session.email,
       amountKobo,
-      { 
+      {
         userId: session.userId,
         reference
       }
+    );
+
+    // Log payment initialization
+    await logPaymentEvent(
+      "payment.initialized",
+      session.userId,
+      amountKobo,
+      reference,
+      "pending",
+      { email: session.email }
     );
 
     console.log("Paystack initialized. Access code:", init.data.access_code);
@@ -91,6 +120,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Paystack initialization error:", error);
+
+    // Log error
+    await logAPIError("/api/paystack/initialize", error, session.userId);
+
     const message = getFriendlyErrorMessage(
       error,
       "We couldn't start the payment. Please try again in a few minutes."
