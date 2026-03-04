@@ -194,27 +194,56 @@ export function DashboardClient() {
         // Determine final result
         if (!verifySuccess) {
           console.error("[PAYMENT] Verification failed after 3 attempts. Error:", verifyError);
+          
+          // Still update balance if it increased
+          if (finalBalance > previousBalance) {
+            console.log("[PAYMENT] Balance increased despite verification failure");
+            setResult({
+              status: "success",
+              message: `Wallet funded successfully! New balance: ${formatNaira(finalBalance)}`
+            });
+            return;
+          }
+          
           setResult({
             status: "error",
-            message: `Payment completed, but verification failed: ${verifyError}. Please contact support with reference: ${reference}`
+            message: `Payment completed, but verification failed: ${verifyError}. Please refresh your balance or contact support with reference: ${reference}`
           });
           return;
         }
 
         if (!updated) {
-          console.warn("[PAYMENT] Verification succeeded but balance didn't increase");
-          setResult({
-            status: "error",
-            message: "Payment verified but balance not updated yet. Please refresh in a moment."
-          });
-          return;
+          console.warn("[PAYMENT] Verification succeeded but balance didn't increase yet");
+          
+          // Force one more balance check
+          try {
+            const finalRes = await fetch("/api/wallet/balance", { cache: "no-store" });
+            if (finalRes.ok) {
+              const finalData = await finalRes.json();
+              setBalance(finalData.balance);
+              finalBalance = finalData.balance;
+              
+              if (finalData.balance > previousBalance) {
+                updated = true;
+              }
+            }
+          } catch (e) {
+            console.error("[PAYMENT] Final balance check failed:", e);
+          }
         }
 
-        console.log("[PAYMENT] Payment flow completed successfully!");
-        setResult({
-          status: "success",
-          message: `Wallet funded successfully! New balance: ${formatNaira(finalBalance)}`
-        });
+        if (updated || finalBalance > previousBalance) {
+          console.log("[PAYMENT] Payment flow completed successfully!");
+          setResult({
+            status: "success",
+            message: `Wallet funded successfully! New balance: ${formatNaira(finalBalance)}`
+          });
+        } else {
+          setResult({
+            status: "error",
+            message: "Payment verified but balance not updated yet. Please refresh your balance in a moment."
+          });
+        }
       };
 
       popup.resumeTransaction(data.accessCode, {
@@ -261,11 +290,18 @@ export function DashboardClient() {
       if (!res.ok) {
         throw new Error(data?.message || "Verification failed");
       }
+      
+      // Clear NIN input and consent after successful verification
+      setNin("");
+      setConsent(false);
+      
       setResult({
         status: "success",
-        message: "Verification successful",
+        message: "NIN verified successfully! Your verification details are ready.",
         verificationId: data.verificationId
       });
+      
+      // Refresh balance to show deduction
       loadBalance();
     } catch (error) {
       setResult({
@@ -509,7 +545,7 @@ export function DashboardClient() {
                   >
                     <Link href={`/dashboard/receipts/${result.verificationId}`}>
                       <Sparkles className="h-4 w-4" />
-                      View Receipt
+                      View Verification Details
                     </Link>
                   </Button>
                 )}
