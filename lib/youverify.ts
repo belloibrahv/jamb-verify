@@ -60,6 +60,13 @@ export async function verifyNinWithYouVerify(nin: string) {
 
       console.log(`[YOUVERIFY] Response status (attempt ${attempt}):`, response.status);
 
+      // Handle rate limiting (429)
+      if (response.status === 429) {
+        const data = await response.json();
+        console.warn(`[YOUVERIFY] Rate limit hit (attempt ${attempt}):`, data.message);
+        throw new Error(data.message || "Too many requests. Please try again in 10 minutes.");
+      }
+
       // Retry on 502/503 errors (server errors)
       if (response.status === 502 || response.status === 503) {
         const text = await response.text();
@@ -74,11 +81,12 @@ export async function verifyNinWithYouVerify(nin: string) {
         }
       }
 
-      // Don't retry on other error codes (400, 401, 404, etc.)
+      // Don't retry on other error codes (400, 401, 403, 404, etc.)
       if (!response.ok) {
-        const text = await response.text();
-        console.error("[YOUVERIFY] Error response:", text);
-        throw new Error(`YouVerify API error (${response.status}): ${text}`);
+        const data = await response.json();
+        console.error("[YOUVERIFY] Error response:", data);
+        const errorMsg = data.message || `API error (${response.status})`;
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();

@@ -132,6 +132,10 @@ export async function POST(request: Request) {
         message: error instanceof Error ? error.message : String(error)
       });
       
+      // Check if it's a rate limit error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isRateLimit = errorMessage.includes("Too many requests") || errorMessage.includes("10 minutes");
+      
       // Refund the wallet
       try {
         await handleRefund({
@@ -140,11 +144,18 @@ export async function POST(request: Request) {
           userId: session.userId,
           walletId: wallet.id,
           masked,
-          reason: "Verification provider error"
+          reason: isRateLimit ? "Rate limit exceeded" : "Verification provider error"
         });
         console.log("[NIN] Refund completed after API error");
       } catch (refundError) {
         console.error("[NIN] Refund failed:", refundError);
+      }
+      
+      // Provide user-friendly message
+      if (isRateLimit) {
+        return NextResponse.json({ 
+          message: "This NIN was recently verified. Please wait 10 minutes before trying again. Your wallet has been refunded."
+        }, { status: 429 });
       }
       
       const message = getFriendlyErrorMessage(
