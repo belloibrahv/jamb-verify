@@ -13,15 +13,15 @@ const steps = [
     color: "from-emerald-500 to-primary"
   },
   {
-    title: "Generate your Virtual NIN (vNIN)",
-    description: "Dial *346*3*YourNIN*471335# or use the NIMC mobile app to get your secure vNIN token.",
+    title: "Enter your 11-digit NIN",
+    description: "Provide the NIN and consent to verify it against NIMC records.",
     icon: Smartphone,
     color: "from-blue-500 to-accent",
     highlight: true
   },
   {
     title: "Verify & download receipt",
-    description: "Enter your vNIN, consent to verification, and get your receipt instantly for ₦500.",
+    description: "We confirm the NIN and generate a JAMB-ready receipt instantly for ₦500.",
     icon: FileCheck2,
     color: "from-orange-500 to-secondary"
   }
@@ -54,11 +54,11 @@ export function HowItWorksSection() {
           <SectionTitle
             eyebrow="How it works"
             title="Three steps to a verified JAMB profile"
-            description="NIMC now requires Virtual NIN (vNIN) for enhanced security and privacy protection."
+            description="Verify your NIN securely and receive a JAMB-ready receipt in minutes."
           />
         </motion.div>
 
-        {/* vNIN Info Banner */}
+        {/* NIN Privacy Note */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -66,33 +66,20 @@ export function HowItWorksSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto max-w-3xl"
         >
-          <Card className="border-blue-200 bg-blue-50/80 backdrop-blur">
+          <Card className="border-emerald-200 bg-emerald-50/80 backdrop-blur">
             <div className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
-                  <Info className="h-5 w-5 text-blue-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                  <Info className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-blue-900">
-                    Important: Virtual NIN (vNIN) Required
+                  <h3 className="font-semibold text-emerald-900">
+                    Your NIN stays protected
                   </h3>
-                  <p className="text-sm text-blue-800 leading-relaxed">
-                    NIMC has upgraded to Virtual NIN for better security. Your vNIN is a temporary, 
-                    secure token that protects your actual NIN. It&apos;s valid for 72 hours and can be 
-                    used once per service.
+                  <p className="text-sm text-emerald-800 leading-relaxed">
+                    We use your 11-digit NIN only for verification and store masked values in
+                    receipts and history for privacy.
                   </p>
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    <div className="text-sm">
-                      <span className="font-medium text-blue-900">USSD:</span>{" "}
-                      <code className="rounded bg-blue-100 px-2 py-1 text-blue-700">
-                        *346*3*YourNIN*471335#
-                      </code>
-                    </div>
-                    <div className="text-sm">
-                      <span className="font-medium text-blue-900">Enterprise Code:</span>{" "}
-                      <code className="rounded bg-blue-100 px-2 py-1 text-blue-700">471335</code>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
