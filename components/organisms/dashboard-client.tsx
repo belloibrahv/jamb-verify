@@ -194,9 +194,14 @@ export function DashboardClient() {
     }
   };
 
-  const formattedNin = nin.toUpperCase().replace(/\s/g, "");
+  const normalizedNin = nin.replace(/\D/g, "").slice(0, 11);
+  const formattedNin = normalizedNin.replace(/(\d{3})(\d{4})(\d{0,4})/, (match, p1, p2, p3) => {
+    if (p3) return `${p1} ${p2} ${p3}`;
+    if (p2) return `${p1} ${p2}`;
+    return p1;
+  }).trim();
   const hasInsufficientBalance = balance !== null && balance < feeKobo;
-  const canVerify = nin.length >= 11 && consent && !hasInsufficientBalance && !verifying;
+  const canVerify = normalizedNin.length === 11 && consent && !hasInsufficientBalance && !verifying;
   const verificationsLeft = balance === null ? null : Math.floor(balance / feeKobo);
 
   return (
@@ -371,12 +376,12 @@ export function DashboardClient() {
                   <Input
                     value={formattedNin}
                     onChange={(e) => setNin(e.target.value)}
-                    placeholder="Enter vNIN (e.g., YV1234567890ABCD)"
-                    maxLength={16}
-                    className="h-12 text-base tracking-wider font-mono"
+                    placeholder="Enter 11-digit NIN (e.g., 123 4567 8901)"
+                    maxLength={13}
+                    className="h-12 text-base tracking-wider"
                   />
                   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{nin.length}/16 characters</span>
+                    <span>{normalizedNin.length}/11 digits</span>
                     <span className="font-medium">Fee: {formatNaira(feeKobo)}</span>
                   </div>
                 </div>
