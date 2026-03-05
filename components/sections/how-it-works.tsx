@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { SectionTitle } from "@/components/atoms/section-title";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, CreditCard, Smartphone, FileCheck2, Info } from "lucide-react";
+import { ArrowRight, CreditCard, Fingerprint, FileCheck2, Info } from "lucide-react";
 
 const steps = [
   {
@@ -15,9 +15,8 @@ const steps = [
   {
     title: "Enter your 11-digit NIN",
     description: "Provide the NIN and consent to verify it against NIMC records.",
-    icon: Smartphone,
-    color: "from-blue-500 to-accent",
-    highlight: true
+    icon: Fingerprint,
+    color: "from-blue-500 to-accent"
   },
   {
     title: "Verify & download receipt",
@@ -95,9 +94,7 @@ export function HowItWorksSection() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
             >
-              <Card className={`group relative overflow-hidden border-border/60 bg-white/80 hover:shadow-glow transition-all duration-300 h-full ${
-                step.highlight ? 'ring-2 ring-blue-200' : ''
-              }`}>
+              <Card className="group relative overflow-hidden border-border/60 bg-white/80 hover:shadow-glow transition-all duration-300 h-full">
                 {/* Step number */}
                 <motion.div
                   className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center"
