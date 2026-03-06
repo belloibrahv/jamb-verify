@@ -31,9 +31,22 @@ export default function RegisterPage() {
     mode: "onSubmit"
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const values = form.getValues();
+    const validation = schema.safeParse(values);
+    
+    if (!validation.success) {
+      // Trigger form validation
+      form.handleSubmit(() => {})();
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -75,15 +88,9 @@ export default function RegisterPage() {
 
       {/* Form */}
       <form 
-        className="space-y-4" 
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit(onSubmit)(e);
-        }}
-        method="POST"
-        action="#"
-        autoComplete="off"
+        onSubmit={handleFormSubmit}
+        noValidate
+        className="space-y-4"
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

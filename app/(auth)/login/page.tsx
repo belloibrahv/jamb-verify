@@ -28,9 +28,22 @@ export default function LoginPage() {
     mode: "onSubmit"
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const values = form.getValues();
+    const validation = schema.safeParse(values);
+    
+    if (!validation.success) {
+      // Trigger form validation
+      form.handleSubmit(() => {})();
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -67,15 +80,9 @@ export default function LoginPage() {
 
       {/* Form */}
       <form 
-        className="space-y-4" 
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit(onSubmit)(e);
-        }}
-        method="POST"
-        action="#"
-        autoComplete="off"
+        onSubmit={handleFormSubmit}
+        noValidate
+        className="space-y-4"
       >
         <div className="space-y-2">
           <label className="text-sm font-medium">Email Address</label>
