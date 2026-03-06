@@ -49,11 +49,11 @@ export default function PrivacyPage() {
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
               <p>
                 <span className="font-semibold text-foreground">Email:</span>{" "}
-                privacy@jambverify.com
+                privacy@verifynin.ng
               </p>
               <p>
                 <span className="font-semibold text-foreground">DPO:</span>{" "}
-                dpo@jambverify.com
+                dpo@verifynin.ng
               </p>
               <p>
                 <span className="font-semibold text-foreground">Phone:</span>{" "}
@@ -169,8 +169,8 @@ export default function PrivacyPage() {
           <section className="rounded-3xl border border-border/60 bg-white/80 p-6 shadow-card md:col-span-2">
             <h2 className="text-lg font-semibold">Children and sensitive data</h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              The service is intended for authorized agents and candidates completing
-              JAMB registration. If a candidate is under 18, the account holder must
+              The service is intended for authorized users completing
+              identity verification for various purposes. If a user is under 18, the account holder must
               have appropriate authorization or guardian consent. Do not submit NIN
               details without explicit permission.
             </p>

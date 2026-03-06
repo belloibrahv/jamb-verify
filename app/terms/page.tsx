@@ -122,11 +122,11 @@ export default function TermsPage() {
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
               <p>
                 <span className="font-semibold text-foreground">Support:</span>{" "}
-                support@jambverify.com
+                support@verifynin.ng
               </p>
               <p>
                 <span className="font-semibold text-foreground">Billing:</span>{" "}
-                billing@jambverify.com
+                billing@verifynin.ng
               </p>
             </div>
           </section>

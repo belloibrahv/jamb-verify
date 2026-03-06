@@ -8,7 +8,7 @@ export default function SupportPage() {
           </p>
           <h1 className="mt-3 font-heading text-3xl font-semibold">Support</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            We&apos;re here to keep your JAMB verification workflow smooth. Reach out with
+            We&apos;re here to keep your NIN verification workflow smooth. Reach out with
             account issues, billing questions, or verification concerns and we&apos;ll guide
             you through the next steps.
           </p>
@@ -28,7 +28,7 @@ export default function SupportPage() {
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
               <p>
                 <span className="font-semibold text-foreground">Email:</span>{" "}
-                support@jambverify.com
+                support@verifynin.ng
               </p>
               <p>
                 <span className="font-semibold text-foreground">Phone:</span>{" "}
@@ -95,7 +95,7 @@ export default function SupportPage() {
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">DPO:</span>{" "}
-              dpo@jambverify.com
+              dpo@verifynin.ng
             </p>
           </section>
         </div>

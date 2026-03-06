@@ -45,7 +45,7 @@ export default function AppleIcon() {
             letterSpacing: '0.05em',
           }}
         >
-          JAMB
+          VN
         </div>
         <div
           style={{

@@ -105,7 +105,7 @@ export default function RegisterPage() {
         <div className="space-y-1">
           <h1 className="font-heading text-2xl font-bold sm:text-3xl">Create Account</h1>
           <p className="text-sm text-muted-foreground">
-            Start verifying NINs for JAMB registration instantly
+            Start verifying NINs for banking, education, travel, and more
           </p>
         </div>
       </div>

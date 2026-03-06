@@ -19,7 +19,7 @@ export default async function DashboardPage() {
               Welcome back, {displayName}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Fund your wallet and verify NINs for JAMB registration.
+              Fund your wallet and verify NINs for any purpose.
             </p>
           </div>
 
