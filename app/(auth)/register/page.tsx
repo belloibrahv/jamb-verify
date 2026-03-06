@@ -41,6 +41,7 @@ export default function RegisterPage() {
         throw new Error(data?.message || "Unable to register");
       }
       router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       setError(
         getFriendlyErrorMessage(
@@ -51,6 +52,11 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    form.handleSubmit(onSubmit)(e);
   };
 
   return (
@@ -69,7 +75,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Form */}
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>

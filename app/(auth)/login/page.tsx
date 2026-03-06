@@ -38,11 +38,17 @@ export default function LoginPage() {
         throw new Error(data?.message || "Unable to login");
       }
       router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    form.handleSubmit(onSubmit)(e);
   };
 
   return (
@@ -61,7 +67,7 @@ export default function LoginPage() {
       </div>
 
       {/* Form */}
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <label className="text-sm font-medium">Email Address</label>
           <Input 
