@@ -4,7 +4,6 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, CheckCircle2, Sparkles, Zap, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { AnimatedLogo } from "@/components/animations/animated-logo";
 import { FloatingShapes } from "@/components/animations/floating-shapes";
 
@@ -96,28 +95,30 @@ export function HeroSection() {
             style={{ y, opacity }}
           >
             <motion.div variants={staggerItem}>
-              <Badge variant="success" className="animate-pulse">
-                <Zap className="h-3 w-3 mr-1" />
-                Instant JAMB NIN Verification
-              </Badge>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-300 text-green-800">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="text-sm font-semibold">JAMB-Compliant • NIMC-Verified</span>
+              </div>
             </motion.div>
             
             <motion.h1
               variants={staggerItem}
               className="font-heading text-5xl font-bold leading-tight md:text-6xl lg:text-7xl bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent"
             >
-              Verify your NIN in{" "}
-              <span className="bg-gradient-to-r from-primary via-emerald-500 to-primary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                seconds
-              </span>
+              Verify NIN for{" "}
+              <span className="bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                JAMB
+              </span>{" "}
+              in seconds
             </motion.h1>
             
             <motion.p
               variants={staggerItem}
               className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
             >
-              Fund your wallet, verify instantly, and finish JAMB registration without queues. 
-              Powered by YouVerify with automatic ₦500 deductions and UTME-ready receipts.
+              Official NIN verification service for JAMB UTME registration. Fund your wallet once, 
+              verify instantly, and get JAMB-compliant receipts. Powered by NIMC database with 
+              automatic ₦500 deductions.
             </motion.p>
             
             <motion.div variants={staggerItem} className="flex flex-wrap gap-4">
