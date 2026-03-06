@@ -224,7 +224,7 @@ export function HeroSection() {
                 
                 <motion.div
                   className="flex items-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-emerald-500/5 p-5"
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={{ scale: 1, opacity: 1 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
