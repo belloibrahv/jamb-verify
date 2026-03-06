@@ -8,15 +8,15 @@ export default function PrivacyPage() {
           </p>
           <h1 className="mt-3 font-heading text-3xl font-semibold">Privacy Policy</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            This policy explains how JAMB Verify collects, uses, and protects personal
-            data when you create an account, fund your wallet, and verify NINs for JAMB
-            registration. We are committed to applicable data protection laws and
+            This policy explains how VerifyNIN collects, uses, and protects personal
+            data when you create an account, fund your wallet, and verify NINs for
+            banking, education, travel, and other purposes. We are committed to applicable data protection laws and
             regulations in Nigeria.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
             <span className="rounded-full bg-muted px-3 py-1">Effective: March 3, 2026</span>
             <span className="rounded-full bg-muted px-3 py-1">
-              Applies to JAMB Verify web + dashboard
+              Applies to VerifyNIN web + dashboard
             </span>
           </div>
         </header>
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
           <aside className="rounded-3xl border border-border/60 bg-white/80 p-6 shadow-card">
             <h2 className="text-lg font-semibold">Data controller</h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              JAMB Verify is operated by its legal entity in Nigeria. Use the contacts
+              VerifyNIN is operated by its legal entity in Nigeria. Use the contacts
               below for privacy requests, complaints, or data protection inquiries.
             </p>
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
           <section className="rounded-3xl border border-border/60 bg-white/80 p-6 shadow-card">
             <h2 className="text-lg font-semibold">How we use your data</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-              <li>Create and secure your JAMB Verify account.</li>
+              <li>Create and secure your VerifyNIN account.</li>
               <li>Submit NIN checks to verification partners and return results.</li>
               <li>Process wallet funding, debits, and refunds.</li>
               <li>Generate receipts and transaction history.</li>

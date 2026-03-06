@@ -8,8 +8,8 @@ export default function TermsPage() {
           </p>
           <h1 className="mt-3 font-heading text-3xl font-semibold">Terms of Service</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            These terms govern your access to JAMB Verify and the services used to fund
-            your wallet, verify NINs, and generate JAMB-ready receipts. By using the
+            These terms govern your access to VerifyNIN and the services used to fund
+            your wallet, verify NINs, and generate official verification documents. By using the
             platform, you agree to these terms.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
@@ -34,12 +34,12 @@ export default function TermsPage() {
           <section className="rounded-3xl border border-border/60 bg-white/80 p-6 shadow-card">
             <h2 className="text-lg font-semibold">Service description</h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              JAMB Verify provides NIN verification to support JAMB registration
-              workflows. Verification results are returned from authorized partners and
+              VerifyNIN provides NIN verification for banking, education, travel, employment,
+              and other official purposes. Verification results are returned from authorized partners and
               depend on the accuracy and availability of NIMC records.
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
-              JAMB Verify is an independent service and is not endorsed by JAMB or NIMC.
+              VerifyNIN is an independent service and is not endorsed by any government agency.
             </p>
           </section>
 
@@ -107,7 +107,7 @@ export default function TermsPage() {
             <p className="mt-3 text-sm text-muted-foreground">
               The service is provided &quot;as is.&quot; We do not warrant that verification
               results will be accepted by third parties. To the maximum extent allowed
-              by law, JAMB Verify is not liable for indirect or consequential damages.
+              by law, VerifyNIN is not liable for indirect or consequential damages.
             </p>
           </section>
 

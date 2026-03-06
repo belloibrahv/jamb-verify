@@ -30,21 +30,21 @@ export const metadata: Metadata = {
     "NIN verification service"
   ],
   authors: [{ name: "VerifyNIN" }],
-  creator: "JAMB Verify",
-  publisher: "JAMB Verify",
-  metadataBase: new URL("https://jamb-verify.vercel.app"),
+  creator: "VerifyNIN",
+  publisher: "VerifyNIN",
+  metadataBase: new URL("https://verifynin.ng"),
   openGraph: {
     type: "website",
     locale: "en_NG",
-    url: "https://jamb-verify.vercel.app",
-    title: "JAMB Verify | Instant NIN Verification",
-    description: "Verify your NIN instantly for JAMB registration. Fast, secure, NDPR-compliant.",
-    siteName: "JAMB Verify"
+    url: "https://verifynin.ng",
+    title: "VerifyNIN | Fast NIN Verification for Banking, Education & More",
+    description: "Verify your NIN instantly for banking, education, travel, and more. Official NIMC verification in minutes.",
+    siteName: "VerifyNIN"
   },
   twitter: {
     card: "summary_large_image",
-    title: "JAMB Verify | Instant NIN Verification",
-    description: "Verify your NIN instantly for JAMB registration. Fast, secure, NDPR-compliant."
+    title: "VerifyNIN | Fast NIN Verification for Banking, Education & More",
+    description: "Verify your NIN instantly for banking, education, travel, and more. Official NIMC verification in minutes."
   },
   robots: {
     index: true,

@@ -36,9 +36,9 @@ export default async function DashboardLayout({
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
-                  JAMB Verify
+                  VerifyNIN
                 </p>
-                <p className="text-sm text-muted-foreground">Wallet console</p>
+                <p className="text-sm text-muted-foreground">Dashboard</p>
               </div>
             </Link>
 
