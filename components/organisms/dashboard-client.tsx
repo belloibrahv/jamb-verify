@@ -7,13 +7,13 @@ import {
   AlertCircle,
   ArrowRight,
   CheckCircle2,
+  Eye,
   Fingerprint,
   History,
   Info,
   Plus,
   RefreshCw,
   Shield,
-  Sparkles,
   Wallet,
   Zap
 } from "lucide-react";
@@ -26,14 +26,14 @@ import { getFriendlyErrorMessage } from "@/lib/utils";
 
 const feeKobo = 50000;
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.12 } }
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
 export function DashboardClient() {
@@ -195,7 +195,7 @@ export function DashboardClient() {
   };
 
   const normalizedNin = nin.replace(/\D/g, "").slice(0, 11);
-  const formattedNin = normalizedNin.replace(/(\d{3})(\d{4})(\d{0,4})/, (match, p1, p2, p3) => {
+  const formattedNin = normalizedNin.replace(/(\d{3})(\d{4})(\d{0,4})/, (_m, p1, p2, p3) => {
     if (p3) return `${p1} ${p2} ${p3}`;
     if (p2) return `${p1} ${p2}`;
     return p1;
@@ -205,140 +205,72 @@ export function DashboardClient() {
   const verificationsLeft = balance === null ? null : Math.floor(balance / feeKobo);
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-6">
-      <motion.section variants={fadeInUp}>
-        <Card className="relative overflow-hidden border-border/70 bg-white/90 shadow-card">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-            <div className="absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
-          </div>
-
-          <CardContent className="relative z-10 p-6">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
-                  Wallet overview
+    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6">
+      {/* Wallet Balance Header - Compact */}
+      <motion.div variants={fadeIn}>
+        <Card className="border-border/50 bg-gradient-to-br from-primary/5 via-white to-accent/5 shadow-sm">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Wallet Balance
                 </p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Wallet className="h-4 w-4 text-primary" />
-                  Available balance
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-4xl font-heading font-semibold">
+                <div className="flex items-baseline gap-3">
+                  <p className="text-3xl font-bold sm:text-4xl">
                     {balance === null ? "—" : formatNaira(balance)}
                   </p>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      hasInsufficientBalance
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-emerald-100 text-emerald-700"
-                    }`}
-                  >
-                    {hasInsufficientBalance ? "Low balance" : "Ready"}
-                  </span>
+                  {balance !== null && (
+                    <span className="text-sm text-muted-foreground">
+                      ({verificationsLeft} {verificationsLeft === 1 ? "verification" : "verifications"})
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Refresh to sync your latest wallet balance.
-                </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRefreshBalance}
                   disabled={refreshing}
+                  className="gap-2"
                 >
                   <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
                   Refresh
                 </Button>
                 <Button
-                  variant="secondary"
                   size="sm"
                   onClick={() =>
                     document.getElementById("fund-section")?.scrollIntoView({ behavior: "smooth" })
                   }
+                  className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Add money
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    document.getElementById("verify-section")?.scrollIntoView({ behavior: "smooth" })
-                  }
-                >
-                  <Fingerprint className="h-4 w-4" />
-                  Verify NIN
+                  Add Money
                 </Button>
               </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-border/70 bg-white/80 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  <Zap className="h-4 w-4 text-secondary" />
-                  Verifications left
-                </div>
-                <p className="mt-3 text-2xl font-semibold">
-                  {verificationsLeft === null ? "—" : verificationsLeft.toLocaleString()}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Based on {formatNaira(feeKobo)} per NIN.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border/70 bg-white/80 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Verification fee
-                </div>
-                <p className="mt-3 text-2xl font-semibold">{formatNaira(feeKobo)}</p>
-                <p className="text-xs text-muted-foreground">
-                  Charged per verification attempt.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border/70 bg-white/80 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  <Shield className="h-4 w-4 text-emerald-600" />
-                  Security
-                </div>
-                <p className="mt-3 text-lg font-semibold text-emerald-800">Privacy forward</p>
-                <p className="text-xs text-muted-foreground">
-                  Sensitive details are masked in history and receipts.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard/transactions">
-                  <History className="h-4 w-4" />
-                  View transaction history
-                </Link>
-              </Button>
             </div>
           </CardContent>
         </Card>
-      </motion.section>
+      </motion.div>
 
+      {/* Low Balance Warning */}
       <AnimatePresence>
         {hasInsufficientBalance && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <Card className="border-0 bg-amber-50 shadow-sm">
+            <Card className="border-amber-200 bg-amber-50">
               <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                    <AlertCircle className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-amber-900 mb-1">Low Balance</p>
-                    <p className="text-sm text-amber-800">
-                      You need at least {formatNaira(feeKobo)} to verify a NIN. Add money to
-                      continue.
+                <div className="flex gap-3">
+                  <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />
+                  <div>
+                    <p className="font-semibold text-amber-900">Insufficient Balance</p>
+                    <p className="mt-1 text-sm text-amber-800">
+                      You need at least {formatNaira(feeKobo)} to verify a NIN. Please add money to continue.
                     </p>
                   </div>
                 </div>
@@ -348,235 +280,357 @@ export function DashboardClient() {
         )}
       </AnimatePresence>
 
-      <motion.section
-        variants={fadeInUp}
-        className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
-      >
+      {/* Main Content - Two Column on Desktop */}
+      <motion.div variants={fadeIn} className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        {/* Left Column - NIN Verification */}
         <div className="space-y-6">
-          <Card
-            id="verify-section"
-            className="border-border/70 bg-white/90 shadow-card"
-          >
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Fingerprint className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Verify NIN</h2>
+          {/* NIN Verification Card - Hero */}
+          <Card id="verify-section" className="border-border/50 shadow-md">
+            <CardContent className="p-6 sm:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                  <Fingerprint className="h-6 w-6 text-primary" />
                 </div>
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  Primary action
-                </span>
+                <div>
+                  <h2 className="text-xl font-bold">Verify Your NIN</h2>
+                  <p className="text-sm text-muted-foreground">Quick and secure verification</p>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">NIN (11 digits)</label>
-                  </div>
+              <div className="space-y-5">
+                {/* NIN Input */}
+                <div className="space-y-2">
+                  <label htmlFor="nin-input" className="text-sm font-semibold">
+                    National Identity Number (NIN)
+                  </label>
                   <Input
+                    id="nin-input"
                     value={formattedNin}
                     onChange={(e) => setNin(e.target.value)}
-                    placeholder="Enter 11-digit NIN (e.g., 123 4567 8901)"
+                    placeholder="123 4567 8901"
                     maxLength={13}
-                    className="h-12 text-base tracking-wider"
+                    className="h-14 text-lg tracking-wider"
+                    disabled={verifying}
                   />
-                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{normalizedNin.length}/11 digits</span>
-                    <span className="font-medium">Fee: {formatNaira(feeKobo)}</span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={normalizedNin.length === 11 ? "text-emerald-600 font-medium" : "text-muted-foreground"}>
+                      {normalizedNin.length}/11 digits
+                    </span>
+                    <span className="text-muted-foreground">
+                      Fee: <span className="font-semibold text-foreground">{formatNaira(feeKobo)}</span>
+                    </span>
                   </div>
                 </div>
 
-                <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-white/70 p-4 cursor-pointer transition hover:bg-muted/60">
+                {/* Consent Checkbox */}
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/70 bg-muted/30 p-4 transition hover:bg-muted/50">
                   <input
                     type="checkbox"
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
-                    className="mt-1"
+                    className="mt-0.5 h-4 w-4 cursor-pointer"
+                    disabled={verifying}
                   />
-                  <span className="text-sm">
-                    I consent to identity verification against NIMC records
+                  <span className="text-sm leading-relaxed">
+                    I consent to verify my identity against NIMC records
                   </span>
                 </label>
 
-                <Button onClick={handleVerify} disabled={!canVerify} className="w-full h-12">
+                {/* Verify Button */}
+                <Button
+                  onClick={handleVerify}
+                  disabled={!canVerify}
+                  size="lg"
+                  className="h-14 w-full text-base font-semibold"
+                >
                   {verifying ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <RefreshCw className="h-5 w-5 animate-spin" />
                       Verifying...
                     </>
                   ) : (
-                    "Verify NIN"
+                    <>
+                      <Fingerprint className="h-5 w-5" />
+                      Verify NIN Now
+                    </>
                   )}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {result && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <Card
-                className={`border-0 ${
-                  result.status === "success" 
-                    ? "bg-emerald-50" 
-                    : result.status === "info"
-                    ? "bg-blue-50"
-                    : "bg-red-50"
-                }`}
+          {/* Result Card */}
+          <AnimatePresence mode="wait">
+            {result && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    {result.status === "success" ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
-                    ) : result.status === "info" ? (
-                      <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
-                    ) : (
-                      <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <p
-                        className={`font-medium ${
-                          result.status === "success" 
-                            ? "text-emerald-900" 
+                <Card
+                  className={`border-2 ${
+                    result.status === "success"
+                      ? "border-emerald-200 bg-emerald-50"
+                      : result.status === "info"
+                      ? "border-blue-200 bg-blue-50"
+                      : "border-red-200 bg-red-50"
+                  }`}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex gap-4">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                          result.status === "success"
+                            ? "bg-emerald-100"
                             : result.status === "info"
-                            ? "text-blue-900"
-                            : "text-red-900"
+                            ? "bg-blue-100"
+                            : "bg-red-100"
                         }`}
                       >
-                        {result.message}
-                      </p>
-                      {result.verificationId && (
-                        <Link
-                          href={`/dashboard/receipts/${result.verificationId}`}
-                          className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-800 mt-2"
+                        {result.status === "success" ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                        ) : result.status === "info" ? (
+                          <Info className="h-5 w-5 text-blue-600" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-red-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p
+                          className={`font-semibold ${
+                            result.status === "success"
+                              ? "text-emerald-900"
+                              : result.status === "info"
+                              ? "text-blue-900"
+                              : "text-red-900"
+                          }`}
                         >
-                          View Details <ArrowRight className="h-4 w-4 ml-1" />
-                        </Link>
-                      )}
+                          {result.status === "success" ? "Verification Successful!" : result.status === "info" ? "Information" : "Verification Failed"}
+                        </p>
+                        <p
+                          className={`mt-1 text-sm ${
+                            result.status === "success"
+                              ? "text-emerald-800"
+                              : result.status === "info"
+                              ? "text-blue-800"
+                              : "text-red-800"
+                          }`}
+                        >
+                          {result.message}
+                        </p>
+                        {result.verificationId && (
+                          <Button
+                            asChild
+                            size="sm"
+                            className="mt-3 gap-2 bg-emerald-600 hover:bg-emerald-700"
+                          >
+                            <Link href={`/dashboard/receipts/${result.verificationId}`}>
+                              <Eye className="h-4 w-4" />
+                              View Your Data
+                              <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <Card className="border-border/70 bg-white/90 shadow-card">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <History className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Recent activity</h3>
+          {/* Quick Stats */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="border-border/50">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Available
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {verificationsLeft === null ? "—" : verificationsLeft}
+                    </p>
+                    <p className="text-xs text-muted-foreground">verifications left</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                    <Shield className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Security
+                    </p>
+                    <p className="text-lg font-bold text-emerald-800">Protected</p>
+                    <p className="text-xs text-muted-foreground">Data is encrypted</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Transaction History Link */}
+          <Card className="border-border/50">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <History className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-semibold">Transaction History</p>
+                    <p className="text-sm text-muted-foreground">View all your activity</p>
+                  </div>
+                </div>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/dashboard/transactions">
+                    View <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Track your last verifications and wallet top-ups in one place.
-              </p>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/transactions">
-                  View transactions
-                </Link>
-              </Button>
             </CardContent>
           </Card>
         </div>
 
+        {/* Right Column - Fund Wallet & Info */}
         <div className="space-y-6">
-          <Card id="fund-section" className="border-border/70 bg-white/90 shadow-card">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">Fund Wallet</h2>
+          {/* Fund Wallet Card */}
+          <Card id="fund-section" className="border-border/50 shadow-md">
+            <CardContent className="p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
+                  <Wallet className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Add Money</h3>
+                  <p className="text-xs text-muted-foreground">Fund your wallet</p>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <Input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="h-12 text-lg"
-                  min="500"
-                />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="amount-input" className="text-sm font-medium">
+                    Amount (₦)
+                  </label>
+                  <Input
+                    id="amount-input"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="500"
+                    className="h-12 text-lg"
+                    min="500"
+                    disabled={loading}
+                  />
+                </div>
 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {[500, 1000, 2000].map((amt) => (
                     <Button
                       key={amt}
                       variant="outline"
                       size="sm"
                       onClick={() => setAmount(String(amt))}
-                      className="flex-1"
+                      disabled={loading}
+                      className="h-10"
                     >
                       ₦{amt}
                     </Button>
                   ))}
                 </div>
 
-                <Button onClick={handleFundWallet} disabled={loading || amountInvalid} className="w-full h-12">
+                <Button
+                  onClick={handleFundWallet}
+                  disabled={loading || amountInvalid}
+                  size="lg"
+                  className="h-12 w-full font-semibold"
+                >
                   {loading ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
                       Processing...
                     </>
                   ) : (
-                    "Fund Wallet"
+                    <>
+                      <Wallet className="h-4 w-4" />
+                      Add Money
+                    </>
                   )}
                 </Button>
 
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  Minimum ₦500 via Paystack
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Info className="h-3.5 w-3.5" />
+                  Minimum ₦500. Powered by Paystack.
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/70 bg-white/90 shadow-card">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-secondary" />
-                <h3 className="text-lg font-semibold">Verification flow</h3>
-              </div>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-start gap-3">
-                  <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+          {/* How It Works */}
+          <Card className="border-border/50">
+            <CardContent className="p-6">
+              <h3 className="mb-4 font-bold">How It Works</h3>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                     1
-                  </span>
-                  Enter your 11-digit NIN.
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Enter your 11-digit NIN
+                  </p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <div className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                     2
-                  </span>
-                  Fund your wallet to cover verification fees.
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Ensure wallet has {formatNaira(feeKobo)}
+                  </p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <div className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                     3
-                  </span>
-                  Submit the NIN and consent to run the check.
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Give consent and verify
+                  </p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <div className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                     4
-                  </span>
-                  Download the receipt for JAMB registration.
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    View and download your data
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/70 bg-white/90 shadow-card">
-            <CardContent className="p-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-lg font-semibold">Data protection</h3>
+          {/* Privacy Notice */}
+          <Card className="border-emerald-200 bg-emerald-50/50">
+            <CardContent className="p-5">
+              <div className="flex gap-3">
+                <Shield className="h-5 w-5 shrink-0 text-emerald-600" />
+                <div>
+                  <p className="font-semibold text-emerald-900">Your Privacy Matters</p>
+                  <p className="mt-1 text-sm text-emerald-800">
+                    Your NIN is masked in history and receipts. We never store sensitive data.
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                NIN values are masked in transaction history and receipts for privacy.
-              </p>
-              <p className="text-xs text-muted-foreground">Need help? Reach out via support.</p>
             </CardContent>
           </Card>
         </div>
-      </motion.section>
+      </motion.div>
     </motion.div>
   );
 }
