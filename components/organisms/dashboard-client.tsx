@@ -172,6 +172,13 @@ export function DashboardClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nin, consent })
       });
+      
+      // Check if response is JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
+      
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data?.message || "Verification failed");
