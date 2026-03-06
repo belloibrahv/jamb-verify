@@ -44,6 +44,8 @@ export function DashboardClient() {
   const [nin, setNin] = useState("");
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paymentReference, setPaymentReference] = useState("");
   const [result, setResult] = useState<{
     status: "success" | "error" | "info";
     message: string;
@@ -70,6 +72,55 @@ export function DashboardClient() {
     setRefreshing(true);
     await loadBalance();
     setRefreshing(false);
+  };
+
+  const handleCheckPayment = async () => {
+    if (!paymentReference.trim()) {
+      setResult({
+        status: "error",
+        message: "Please enter a payment reference"
+      });
+      return;
+    }
+
+    setCheckingPayment(true);
+    setResult(null);
+    
+    try {
+      const res = await fetch("/api/wallet/check-pending-payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: paymentReference.trim() })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to check payment");
+      }
+
+      if (data.recovered) {
+        setResult({
+          status: "success",
+          message: `Payment recovered! ${formatNaira(data.amount)} added to your wallet.`
+        });
+        setPaymentReference("");
+        await loadBalance();
+      } else {
+        setResult({
+          status: "info",
+          message: data.message || "Payment already processed"
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setResult({
+        status: "error",
+        message: errorMessage
+      });
+    } finally {
+      setCheckingPayment(false);
+    }
   };
 
   useEffect(() => {
@@ -576,6 +627,60 @@ export function DashboardClient() {
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Info className="h-3.5 w-3.5" />
                   Minimum ₦500. Powered by Paystack.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Check Payment Status Card */}
+          <Card className="border-blue-200 bg-blue-50/50">
+            <CardContent className="p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                  <RefreshCw className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-blue-900">Payment Not Showing?</h3>
+                  <p className="text-xs text-blue-700">Check if your payment went through</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label htmlFor="payment-ref-input" className="text-sm font-medium text-blue-900">
+                    Payment Reference
+                  </label>
+                  <Input
+                    id="payment-ref-input"
+                    value={paymentReference}
+                    onChange={(e) => setPaymentReference(e.target.value)}
+                    placeholder="Enter payment reference"
+                    className="h-11 bg-white"
+                    disabled={checkingPayment}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleCheckPayment}
+                  disabled={checkingPayment || !paymentReference.trim()}
+                  size="lg"
+                  className="h-11 w-full font-semibold bg-blue-600 hover:bg-blue-700"
+                >
+                  {checkingPayment ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Check Payment Status
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  If money was deducted but didn&apos;t reflect in your wallet, enter the payment reference here to recover it.
                 </p>
               </div>
             </CardContent>
