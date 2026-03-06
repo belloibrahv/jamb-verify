@@ -19,8 +19,8 @@ const steps = [
     color: "from-blue-500 to-accent"
   },
   {
-    title: "Verify & download receipt",
-    description: "We confirm the NIN and generate a JAMB-ready receipt instantly for ₦500.",
+    title: "Verify & download document",
+    description: "We confirm the NIN and generate a JAMB-ready verification document instantly for ₦500.",
     icon: FileCheck2,
     color: "from-orange-500 to-secondary"
   }
@@ -53,7 +53,7 @@ export function HowItWorksSection() {
           <SectionTitle
             eyebrow="How it works"
             title="Three steps to a verified JAMB profile"
-            description="Verify your NIN securely and receive a JAMB-ready receipt in minutes."
+            description="Verify your NIN securely and receive a JAMB-ready verification document in minutes."
           />
         </motion.div>
 
@@ -77,7 +77,7 @@ export function HowItWorksSection() {
                   </h3>
                   <p className="text-sm text-emerald-800 leading-relaxed">
                     We use your 11-digit NIN only for verification and store masked values in
-                    receipts and history for privacy.
+                    verification documents and history for privacy.
                   </p>
                 </div>
               </div>

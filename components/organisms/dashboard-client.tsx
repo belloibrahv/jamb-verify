@@ -630,7 +630,7 @@ export function DashboardClient() {
                 <div>
                   <p className="font-semibold text-emerald-900">Your Privacy Matters</p>
                   <p className="mt-1 text-sm text-emerald-800">
-                    Your NIN is masked in history and receipts. We never store sensitive data.
+                    Your NIN is masked in history and verification documents. We never store sensitive data.
                   </p>
                 </div>
               </div>

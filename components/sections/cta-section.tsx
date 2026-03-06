@@ -109,7 +109,7 @@ export function CTASection() {
               className="text-lg md:text-xl text-white/90 leading-relaxed"
             >
               Register once, fund your wallet, and verify any candidate NIN instantly. Every
-              receipt is ready for upload during UTME registration.
+              verification document is ready for upload during UTME registration.
             </motion.p>
             
             <motion.div

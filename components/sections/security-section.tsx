@@ -26,8 +26,8 @@ const safeguards = [
     color: "from-purple-500/20 to-primary/10"
   },
   {
-    title: "Receipt access on any device",
-    description: "Download receipts securely from mobile or desktop dashboards.",
+    title: "Document access on any device",
+    description: "Download verification documents securely from mobile or desktop dashboards.",
     icon: Smartphone,
     color: "from-orange-500/20 to-secondary/10"
   },

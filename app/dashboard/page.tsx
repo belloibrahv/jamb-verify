@@ -30,7 +30,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center gap-2 rounded-2xl border border-border/70 bg-white/80 px-4 py-3 text-sm font-medium text-muted-foreground">
               <Sparkles className="h-4 w-4 text-secondary" />
-              Instant receipts
+              Instant verification documents
             </div>
           </div>
         </div>

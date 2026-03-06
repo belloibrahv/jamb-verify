@@ -261,7 +261,7 @@ export default async function ReceiptPage({
                 <p className="text-sm font-bold text-green-900">JAMB Compliant</p>
               </div>
               <p className="text-xs text-green-700">
-                This verification receipt meets all requirements for JAMB UTME registration
+                This verification document meets all requirements for JAMB UTME registration
                 and can be uploaded during the application process.
               </p>
             </div>

@@ -117,7 +117,7 @@ export function HeroSection() {
               className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
             >
               Official NIN verification service for JAMB UTME registration. Fund your wallet once, 
-              verify instantly, and get JAMB-compliant receipts. Powered by NIMC database with 
+              verify instantly, and get JAMB-compliant verification documents. Powered by NIMC database with 
               automatic ₦500 deductions.
             </motion.p>
             
@@ -202,7 +202,7 @@ export function HeroSection() {
                   >
                     NIMC Snapshot
                   </motion.p>
-                  <p className="text-xl font-bold mt-1">Verification Receipt</p>
+                  <p className="text-xl font-bold mt-1">Verification Document</p>
                 </div>
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -238,7 +238,7 @@ export function HeroSection() {
                   </motion.div>
                   <div>
                     <p className="text-sm font-bold">NIN matched successfully</p>
-                    <p className="text-xs text-muted-foreground">Receipt ready for JAMB profile</p>
+                    <p className="text-xs text-muted-foreground">Document ready for JAMB profile</p>
                   </div>
                 </motion.div>
               </div>

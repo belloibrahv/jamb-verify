@@ -24,7 +24,7 @@ const features = [
   {
     icon: CheckCircle2,
     title: "JAMB-Compliant",
-    description: "Verification receipts accepted for UTME registration"
+    description: "Verification documents accepted for UTME registration"
   },
   {
     icon: FileCheck,
@@ -128,7 +128,7 @@ export function PartnersSection() {
           <div className="rounded-xl border border-border/60 bg-muted/30 p-6 text-center">
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">Official Compliance:</span> All NIN verifications
-              are performed through authorized channels and generate receipts that meet JAMB requirements
+              are performed through authorized channels and generate verification documents that meet JAMB requirements
               for UTME registration. Our service is designed to streamline the verification process while
               maintaining full compliance with NIMC and JAMB guidelines.
             </p>
