@@ -186,12 +186,10 @@ export function DashboardClient() {
       } else {
         setNin("");
         setConsent(false);
-        setResult({
-          status: "success",
-          message: "NIN verified successfully!",
-          verificationId: data.verificationId
-        });
         loadBalance();
+        
+        // Automatically redirect to receipt page
+        window.location.href = `/dashboard/receipts/${data.verificationId}`;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
