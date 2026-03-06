@@ -21,13 +21,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0 print:hidden">
         <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -right-28 top-10 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute bottom-0 right-1/4 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-white/80 backdrop-blur print:hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-between gap-4 py-4">
             <Link href="/dashboard" className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <nav className="md:hidden border-b border-border/70 bg-white/80 backdrop-blur">
+      <nav className="md:hidden border-b border-border/70 bg-white/80 backdrop-blur print:hidden">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 py-3">
             <Link
@@ -97,8 +97,8 @@ export default async function DashboardLayout({
         </div>
       </nav>
 
-      <main className="relative z-10 container mx-auto px-4 pb-12 pt-8 max-w-6xl">
-        <div className="mb-6 flex items-center gap-3 lg:hidden">
+      <main className="relative z-10 container mx-auto px-4 pb-12 pt-8 max-w-6xl print:p-0 print:max-w-none">
+        <div className="mb-6 flex items-center gap-3 lg:hidden print:hidden">
           <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border/70 bg-white/90 px-4 py-3 shadow-sm">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <UserCircle className="h-5 w-5" />

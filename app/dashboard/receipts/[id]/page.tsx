@@ -65,8 +65,8 @@ export default async function ReceiptPage({
         </p>
       </div>
 
-      {/* Professional Document */}
-      <div className="bg-white shadow-lg print:shadow-none">
+      {/* Professional Document - This will be the only thing visible when printing */}
+      <div className="bg-white shadow-lg print:shadow-none print:block">
         {/* Document Header */}
         <div className="border-b-4 border-primary bg-gradient-to-r from-primary/5 to-accent/5 p-8 print:border-b-2">
           <div className="flex items-start justify-between gap-6">

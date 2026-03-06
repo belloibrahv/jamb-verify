@@ -154,3 +154,78 @@ body {
   animation: bounce-subtle 2s ease-in-out infinite;
 }
 
+/* Print Styles */
+@media print {
+  /* Reset page margins and background */
+  @page {
+    margin: 0.5cm;
+    size: A4 portrait;
+  }
+
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Remove background colors and images */
+  body {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  /* Show only the receipt content */
+  .print\:block,
+  .print\:block * {
+    visibility: visible;
+  }
+
+  /* Ensure receipt takes full width */
+  .print\:block {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  /* Ensure colors print correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Hide navigation, headers, and other UI elements */
+  header,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Optimize text for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Prevent page breaks inside elements */
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force page breaks where needed */
+  .print\:break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print\:break-after {
+    break-after: page;
+    page-break-after: always;
+  }
+}
