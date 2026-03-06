@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/sections/hero-section";
+import { UseCasesSection } from "@/components/sections/use-cases-section";
 import { FeaturesSection } from "@/components/sections/features-section";
 import { PartnersSection } from "@/components/sections/partners-section";
 import { HowItWorksSection } from "@/components/sections/how-it-works";
@@ -10,6 +11,7 @@ export default function HomePage() {
   return (
     <main className="relative">
       <HeroSection />
+      <UseCasesSection />
       <FeaturesSection />
       <PartnersSection />
       <HowItWorksSection />

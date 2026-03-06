@@ -44,10 +44,10 @@ export function HeroSection() {
             <AnimatedLogo />
             <div>
               <p className="text-lg font-semibold group-hover:text-primary transition-colors">
-                JAMB Verify
+                VerifyNIN
               </p>
               <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                NIN ID HUB
+                Nigeria
               </p>
             </div>
           </Link>
@@ -97,7 +97,7 @@ export function HeroSection() {
             <motion.div variants={staggerItem}>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-300 text-green-800">
                 <CheckCircle2 className="h-4 w-4" />
-                <span className="text-sm font-semibold">JAMB-Compliant • NIMC-Verified</span>
+                <span className="text-sm font-semibold">NIMC-Verified • Secure • Instant</span>
               </div>
             </motion.div>
             
@@ -105,20 +105,18 @@ export function HeroSection() {
               variants={staggerItem}
               className="font-heading text-5xl font-bold leading-tight md:text-6xl lg:text-7xl bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent"
             >
-              Verify NIN for{" "}
+              Verify Your NIN{" "}
               <span className="bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                JAMB
-              </span>{" "}
-              in seconds
+                in Minutes
+              </span>
             </motion.h1>
             
             <motion.p
               variants={staggerItem}
               className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
             >
-              Official NIN verification service for JAMB UTME registration. Fund your wallet once, 
-              verify instantly, and get JAMB-compliant verification documents. Powered by NIMC database with 
-              automatic ₦500 deductions.
+              Fast, secure NIN verification for banking, education, travel, and more. 
+              Get your official NIMC-verified document instantly. Only ₦500 per verification.
             </motion.p>
             
             <motion.div variants={staggerItem} className="flex flex-wrap gap-4">
@@ -138,9 +136,9 @@ export function HeroSection() {
               className="flex flex-wrap gap-6 text-sm"
             >
               {[
-                { icon: Shield, text: "NDPR consent captured" },
-                { icon: Zap, text: "Paystack card + transfer" },
-                { icon: Clock, text: "Auto-refund on failure" }
+                { icon: Shield, text: "Bank-grade security" },
+                { icon: Zap, text: "Instant verification" },
+                { icon: Clock, text: "24/7 availability" }
               ].map((item, i) => (
                 <motion.div
                   key={i}
@@ -237,8 +235,8 @@ export function HeroSection() {
                     <CheckCircle2 className="h-6 w-6" />
                   </motion.div>
                   <div>
-                    <p className="text-sm font-bold">NIN matched successfully</p>
-                    <p className="text-xs text-muted-foreground">Document ready for JAMB profile</p>
+                    <p className="text-sm font-bold">NIN verified successfully</p>
+                    <p className="text-xs text-muted-foreground">Official NIMC verification</p>
                   </div>
                 </motion.div>
               </div>
@@ -251,8 +249,8 @@ export function HeroSection() {
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-80" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
-                  <p className="text-xs font-semibold">Verified Student</p>
-                  <p className="text-sm opacity-90">Ready for JAMB Registration</p>
+                  <p className="text-xs font-semibold">Verified Identity</p>
+                  <p className="text-sm opacity-90">Ready for Any Purpose</p>
                 </div>
               </motion.div>
             </motion.div>

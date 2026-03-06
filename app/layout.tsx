@@ -16,18 +16,20 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "JAMB Verify | Instant NIN Verification for UTME Registration",
+  title: "VerifyNIN | Fast NIN Verification for Banking, Education & More",
   description:
-    "Verify your NIN instantly for JAMB registration. Fund wallet via Paystack, get NIMC-verified receipts in seconds. Fast, secure, NDPR-compliant NIN verification service.",
+    "Verify your NIN instantly for banking, JAMB, passport, employment and more. Official NIMC verification in minutes. Secure, affordable, 24/7 available. Only ₦500 per verification.",
   keywords: [
-    "JAMB NIN verification",
-    "UTME NIN check",
-    "Nigeria NIN verification",
+    "NIN verification Nigeria",
+    "verify NIN online",
+    "NIN verification for bank account",
+    "NIN verification for JAMB",
+    "NIN verification for passport",
     "NIMC verification",
-    "JAMB registration",
-    "instant NIN verification"
+    "instant NIN verification",
+    "NIN verification service"
   ],
-  authors: [{ name: "JAMB Verify" }],
+  authors: [{ name: "VerifyNIN" }],
   creator: "JAMB Verify",
   publisher: "JAMB Verify",
   metadataBase: new URL("https://jamb-verify.vercel.app"),
