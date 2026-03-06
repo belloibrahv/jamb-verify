@@ -5,6 +5,17 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
 
+const sparklePositions = [
+  { left: 20, top: 15 },
+  { left: 80, top: 25 },
+  { left: 45, top: 70 },
+  { left: 65, top: 40 },
+  { left: 30, top: 85 },
+  { left: 90, top: 60 },
+  { left: 15, top: 50 },
+  { left: 75, top: 80 }
+];
+
 export function CTASection() {
   return (
     <section className="py-24 relative overflow-hidden">
@@ -44,13 +55,13 @@ export function CTASection() {
           />
           
           {/* Floating sparkles */}
-          {[...Array(8)].map((_, i) => (
+          {sparklePositions.map((pos, i) => (
             <motion.div
               key={i}
               className="absolute"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`
+                left: `${pos.left}%`,
+                top: `${pos.top}%`
               }}
               animate={{
                 y: [0, -30, 0],
@@ -58,9 +69,9 @@ export function CTASection() {
                 scale: [0, 1, 0]
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: 3 + (i * 0.3),
                 repeat: Infinity,
-                delay: Math.random() * 3
+                delay: i * 0.4
               }}
             >
               <Sparkles className="h-4 w-4 text-white/60" />
