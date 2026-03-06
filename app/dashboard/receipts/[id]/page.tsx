@@ -68,7 +68,15 @@ export default async function ReceiptPage({
       {/* Professional Document - This will be the only thing visible when printing */}
       <div className="bg-white shadow-lg print:shadow-none print:block">
         {/* Document Header */}
-        <div className="border-b-4 border-primary bg-gradient-to-r from-primary/5 to-accent/5 p-8 print:border-b-2">
+        <div className="relative overflow-hidden border-b-4 border-primary bg-gradient-to-r from-primary/5 to-accent/5 p-8 print:border-b-2">
+          <Image
+            src="/images/naija.png"
+            alt=""
+            width={160}
+            height={160}
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 opacity-10 print:opacity-20"
+          />
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
@@ -79,9 +87,18 @@ export default async function ReceiptPage({
                   <h1 className="text-2xl font-bold text-primary print:text-3xl">
                     VerifyNIN
                   </h1>
-                  <p className="text-xs text-muted-foreground">
-                    Powered by NIMC Database
-                  </p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Verified by</span>
+                    <Image
+                      src="/images/nimc.png"
+                      alt="NIMC logo"
+                      width={36}
+                      height={36}
+                      priority
+                      unoptimized
+                      className="h-8 w-8 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -96,11 +113,26 @@ export default async function ReceiptPage({
             <div className="hidden print:flex flex-col gap-2 text-right">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 border border-green-300">
                 <CheckCircle2 className="h-4 w-4 text-green-700" />
-                <span className="text-xs font-semibold text-green-900">NIMC Verified</span>
+                <Image
+                  src="/images/nimc.png"
+                  alt="NIMC logo"
+                  width={20}
+                  height={20}
+                  unoptimized
+                  className="h-4 w-4 object-contain"
+                />
+                <span className="text-xs font-semibold text-green-900">Verified</span>
               </div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 border border-blue-300">
-                <Shield className="h-4 w-4 text-blue-700" />
-                <span className="text-xs font-semibold text-blue-900">NIMC Verified</span>
+                <Image
+                  src="/images/nimc.png"
+                  alt="NIMC logo"
+                  width={20}
+                  height={20}
+                  unoptimized
+                  className="h-4 w-4 object-contain"
+                />
+                <span className="text-xs font-semibold text-blue-900">Verified</span>
               </div>
             </div>
             
@@ -118,9 +150,17 @@ export default async function ReceiptPage({
             </div>
             <div>
               <p className="font-bold text-emerald-900">VERIFICATION SUCCESSFUL</p>
-              <p className="text-sm text-emerald-700">
-                This NIN has been verified against NIMC records
-              </p>
+              <div className="flex items-center gap-2 text-sm text-emerald-700">
+                <span>This NIN has been verified against official identity records</span>
+                <Image
+                  src="/images/nimc.png"
+                  alt="NIMC logo"
+                  width={18}
+                  height={18}
+                  unoptimized
+                  className="h-4 w-4 object-contain"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -247,7 +287,16 @@ export default async function ReceiptPage({
             <p className="text-sm font-semibold text-primary">Important Notice</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               This document serves as proof of NIN verification. It has been verified against the
-              National Identity Management Commission (NIMC) database. This document is valid for
+              National Identity Management Commission{" "}
+              <Image
+                src="/images/nimc.png"
+                alt="NIMC logo"
+                width={16}
+                height={16}
+                unoptimized
+                className="inline-block h-4 w-4 align-text-bottom"
+              />{" "}
+              database. This document is valid for
               banking, education, travel, employment, and other official purposes. Keep this document safe and do not
               share with unauthorized persons.
             </p>
@@ -267,12 +316,18 @@ export default async function ReceiptPage({
             </div>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Shield className="h-5 w-5 text-blue-600" />
-                <p className="text-sm font-bold text-blue-900">NIMC Verified</p>
+                <Image
+                  src="/images/nimc.png"
+                  alt="NIMC logo"
+                  width={20}
+                  height={20}
+                  unoptimized
+                  className="h-5 w-5 object-contain"
+                />
+                <p className="text-sm font-bold text-blue-900">Verified</p>
               </div>
               <p className="text-xs text-blue-700">
-                Data verified directly from the National Identity Management Commission
-                official database using authorized API access.
+                Data verified directly from the official national identity database using authorized API access.
               </p>
             </div>
           </div>
@@ -291,12 +346,30 @@ export default async function ReceiptPage({
             
             <div className="flex items-center justify-center gap-8 mb-4 text-xs text-muted-foreground">
               <div className="text-center">
-                <p className="font-semibold text-green-700">NIMC</p>
+                <div className="flex items-center justify-center">
+                  <Image
+                    src="/images/nimc.png"
+                    alt="NIMC logo"
+                    width={20}
+                    height={20}
+                    unoptimized
+                    className="h-5 w-5 object-contain"
+                  />
+                </div>
                 <p className="text-[10px]">Verified Service</p>
               </div>
               <div className="h-8 w-px bg-border"></div>
               <div className="text-center">
-                <p className="font-semibold text-blue-700">NIMC</p>
+                <div className="flex items-center justify-center">
+                  <Image
+                    src="/images/nimc.png"
+                    alt="NIMC logo"
+                    width={20}
+                    height={20}
+                    unoptimized
+                    className="h-5 w-5 object-contain"
+                  />
+                </div>
                 <p className="text-[10px]">Verified Data</p>
               </div>
             </div>
