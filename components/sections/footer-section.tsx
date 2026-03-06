@@ -35,14 +35,14 @@ export function FooterSection() {
             <div className="flex items-center gap-3">
               <AnimatedLogo />
               <div>
-                <p className="text-lg font-bold">JAMB Verify</p>
+                <p className="text-lg font-bold">VerifyNIN</p>
                 <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                  NIN ID HUB
+                  Nigeria
                 </p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Fast, secure, and NDPR-compliant NIN verification for JAMB registration.
+              Fast, secure, and NDPR-compliant NIN verification for all your needs.
             </p>
             <div className="flex items-center gap-3">
               <motion.a
@@ -66,7 +66,7 @@ export function FooterSection() {
                 <Github className="h-4 w-4" />
               </motion.a>
               <motion.a
-                href="mailto:support@jambverify.com"
+                href="mailto:support@verifynin.ng"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
@@ -171,7 +171,7 @@ export function FooterSection() {
           className="mt-12 pt-8 border-t border-border/70 flex flex-wrap items-center justify-between gap-4"
         >
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} JAMB Verify. All rights reserved.
+            © {new Date().getFullYear()} VerifyNIN. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <span>Made with ❤️ in Nigeria</span>

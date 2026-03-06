@@ -797,8 +797,8 @@ export function DashboardClient() {
             <h4 className="mb-3 text-sm font-semibold text-foreground">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="mailto:support@jambverify.com" className="hover:text-primary transition-colors">
-                  support@jambverify.com
+                <a href="mailto:support@verifynin.ng" className="hover:text-primary transition-colors">
+                  support@verifynin.ng
                 </a>
               </li>
               <li className="text-xs">
@@ -809,7 +809,7 @@ export function DashboardClient() {
         </div>
 
         <div className="mt-6 pt-6 border-t border-border/50 text-center text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} JAMB Verify. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} VerifyNIN. All rights reserved.</p>
         </div>
       </motion.div>
     </motion.div>

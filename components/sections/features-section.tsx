@@ -46,7 +46,7 @@ const features = [
   },
   {
     title: "Verification document",
-    description: "Download a JAMB-ready verification document with verified identity data.",
+    description: "Download an official verification document with verified identity data for any purpose.",
     icon: CreditCard,
     color: "from-teal-500/20 to-accent/10"
   }
@@ -84,8 +84,8 @@ export function FeaturesSection() {
         >
           <SectionTitle
             eyebrow="Features"
-            title="Built for high-volume JAMB registration"
-            description="Every feature mirrors the JAMB workflow: wallet funding, NIN validation, and instant verification documents with the right data fields."
+            title="Built for reliable NIN verification"
+            description="Every feature designed for fast, secure verification: wallet funding, NIN validation, and instant verification documents."
           />
           <motion.div
             initial={{ scale: 1 }}

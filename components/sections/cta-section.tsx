@@ -98,7 +98,7 @@ export function CTASection() {
               transition={{ delay: 0.3 }}
               className="font-heading text-4xl md:text-5xl font-bold leading-tight"
             >
-              Ready for a stress-free JAMB registration?
+              Ready to verify your NIN?
             </motion.h2>
             
             <motion.p

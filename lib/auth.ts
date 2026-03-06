@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const SESSION_COOKIE = "jamb_session";
+const SESSION_COOKIE = "verifynin_session";
 const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
 
 export type SessionPayload = {

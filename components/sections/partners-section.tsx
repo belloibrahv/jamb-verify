@@ -1,33 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, CheckCircle2, Building2, FileCheck } from "lucide-react";
+import { Shield, CheckCircle2, Building2 } from "lucide-react";
 
 const partners = [
   {
-    name: "JAMB",
-    fullName: "Joint Admissions and Matriculation Board",
-    description: "Official UTME registration authority",
-    icon: Building2,
-    color: "text-green-600"
-  },
-  {
     name: "NIMC",
     fullName: "National Identity Management Commission",
-    description: "National identity verification provider",
+    description: "Official NIN database authority",
     icon: Shield,
     color: "text-blue-600"
+  },
+  {
+    name: "Paystack",
+    fullName: "Paystack Payment Gateway",
+    description: "Secure payment processing",
+    icon: Building2,
+    color: "text-green-600"
   }
 ];
 
 const features = [
   {
     icon: CheckCircle2,
-    title: "JAMB-Compliant",
-    description: "Verification documents accepted for UTME registration"
-  },
-  {
-    icon: FileCheck,
     title: "NIMC-Verified",
     description: "Direct integration with official NIN database"
   },
@@ -128,9 +123,8 @@ export function PartnersSection() {
           <div className="rounded-xl border border-border/60 bg-muted/30 p-6 text-center">
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">Official Compliance:</span> All NIN verifications
-              are performed through authorized channels and generate verification documents that meet JAMB requirements
-              for UTME registration. Our service is designed to streamline the verification process while
-              maintaining full compliance with NIMC and JAMB guidelines.
+              are performed through authorized channels and generate official verification documents accepted
+              for banking, education, travel, employment, and government services across Nigeria.
             </p>
           </div>
         </motion.div>

@@ -153,7 +153,7 @@ export async function initializePaystackPayment(
             {
               display_name: "Service",
               variable_name: "service",
-              value: "JAMB NIN Verification"
+              value: "NIN Verification"
             }
           ]
         }

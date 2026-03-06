@@ -20,7 +20,7 @@ const steps = [
   },
   {
     title: "Verify & download document",
-    description: "We confirm the NIN and generate a JAMB-ready verification document instantly for ₦500.",
+    description: "We confirm the NIN and generate an official verification document instantly for ₦500.",
     icon: FileCheck2,
     color: "from-orange-500 to-secondary"
   }
@@ -52,8 +52,8 @@ export function HowItWorksSection() {
         >
           <SectionTitle
             eyebrow="How it works"
-            title="Three steps to a verified JAMB profile"
-            description="Verify your NIN securely and receive a JAMB-ready verification document in minutes."
+            title="Three steps to verified identity"
+            description="Verify your NIN securely and receive an official verification document in minutes."
           />
         </motion.div>
 

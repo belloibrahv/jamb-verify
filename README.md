@@ -1,12 +1,12 @@
-# JAMB Verify - NIN Verification Service
+# VerifyNIN - Universal NIN Verification Service
 
-A secure, fast NIN verification platform for JAMB registration. Built with Next.js 15, TypeScript, and Drizzle ORM.
+A secure, fast NIN verification platform for banking, education, travel, and more. Built with Next.js 15, TypeScript, and Drizzle ORM.
 
 ## Features
 
 - 🔐 Secure NIN verification via YouVerify API
 - 💳 Wallet-based payment system with Paystack
-- 📄 Instant receipt generation for JAMB registration
+- 📄 Instant verification document generation for any purpose
 - 🔒 Privacy-focused (masked NIN in history)
 - ⚡ Real-time verification with automatic refunds on failure
 - 📊 Transaction history and audit logging
@@ -267,4 +267,4 @@ For issues or questions:
 
 ---
 
-**Built with ❤️ for JAMB candidates**
+**Built with ❤️ in Nigeria**
