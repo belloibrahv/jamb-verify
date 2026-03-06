@@ -25,7 +25,10 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) });
+  const form = useForm<FormValues>({ 
+    resolver: zodResolver(schema),
+    mode: "onSubmit"
+  });
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
@@ -54,11 +57,6 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    form.handleSubmit(onSubmit)(e);
-  };
-
   return (
     <Card className="w-full max-w-lg space-y-6 border-border/70 bg-white p-6 shadow-lg sm:p-8">
       {/* Header */}
@@ -75,7 +73,17 @@ export default function RegisterPage() {
       </div>
 
       {/* Form */}
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form 
+        className="space-y-4" 
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        method="POST"
+        action="#"
+        autoComplete="off"
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>
