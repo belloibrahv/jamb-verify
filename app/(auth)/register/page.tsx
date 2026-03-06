@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getFriendlyErrorMessage } from "@/lib/utils";
-import { ShieldCheck, UserPlus, AlertCircle } from "lucide-react";
+import { ShieldCheck, UserPlus, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const schema = z.object({
   fullName: z.string().min(3, "Enter your full name (at least 3 characters)"),
@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm<FormValues>({ 
     resolver: zodResolver(schema),
     mode: "onSubmit"
@@ -134,12 +135,26 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Password</label>
-          <Input 
-            type="password" 
-            placeholder="Create a strong password"
-            {...form.register("password")}
-            className="h-11"
-          />
+          <div className="relative">
+            <Input 
+              type={showPassword ? "text" : "password"}
+              placeholder="Create a strong password"
+              {...form.register("password")}
+              className="h-11 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           {form.formState.errors.password && (
             <p className="flex items-center gap-1 text-xs text-red-600">
               <AlertCircle className="h-3 w-3" />
