@@ -111,7 +111,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Form Fields */}
-      <div className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>
@@ -124,6 +124,7 @@ export default function RegisterPage() {
               }}
               onKeyPress={handleKeyPress}
               className="h-11"
+              autoComplete="name"
             />
             {fullNameError && (
               <p className="flex items-center gap-1 text-xs text-red-600">
@@ -144,6 +145,7 @@ export default function RegisterPage() {
               onKeyPress={handleKeyPress}
               inputMode="tel"
               className="h-11"
+              autoComplete="tel"
             />
             {phoneError && (
               <p className="flex items-center gap-1 text-xs text-red-600">
@@ -166,6 +168,7 @@ export default function RegisterPage() {
             }}
             onKeyPress={handleKeyPress}
             className="h-11"
+            autoComplete="email"
           />
           {emailError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
@@ -188,6 +191,7 @@ export default function RegisterPage() {
               }}
               onKeyPress={handleKeyPress}
               className="h-11 pr-10"
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -218,11 +222,10 @@ export default function RegisterPage() {
         )}
 
         <Button 
-          type="button"
+          type="submit"
           size="lg" 
           className="w-full" 
           disabled={loading}
-          onClick={handleSubmit}
         >
           {loading ? (
             "Creating account..."
@@ -233,7 +236,7 @@ export default function RegisterPage() {
             </>
           )}
         </Button>
-      </div>
+      </form>
 
       {/* Footer */}
       <div className="space-y-4 text-center">

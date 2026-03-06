@@ -85,7 +85,7 @@ export default function LoginPage() {
       </div>
 
       {/* Form Fields */}
-      <div className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Email Address</label>
           <Input 
@@ -98,6 +98,7 @@ export default function LoginPage() {
             }}
             onKeyPress={handleKeyPress}
             className="h-11"
+            autoComplete="email"
           />
           {emailError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
@@ -120,6 +121,7 @@ export default function LoginPage() {
               }}
               onKeyPress={handleKeyPress}
               className="h-11 pr-10"
+              autoComplete="current-password"
             />
             <button
               type="button"
@@ -150,11 +152,10 @@ export default function LoginPage() {
         )}
 
         <Button 
-          type="button"
+          type="submit"
           size="lg" 
           className="w-full" 
           disabled={loading}
-          onClick={handleSubmit}
         >
           {loading ? (
             "Signing in..."
@@ -165,7 +166,7 @@ export default function LoginPage() {
             </>
           )}
         </Button>
-      </div>
+      </form>
 
       {/* Footer */}
       <div className="space-y-4 text-center">
