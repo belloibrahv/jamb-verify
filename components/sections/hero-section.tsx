@@ -198,6 +198,7 @@ export function HeroSection() {
                 width={96}
                 height={96}
                 aria-hidden="true"
+                unoptimized
                 className="pointer-events-none absolute right-6 top-6 h-16 w-16 opacity-10"
               />
               <div className="flex items-center justify-between">

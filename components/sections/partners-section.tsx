@@ -85,6 +85,7 @@ export function PartnersSection() {
                           alt={`${source.name} logo.`}
                           width={72}
                           height={72}
+                          unoptimized
                           className="h-16 w-16 object-contain"
                         />
                       ) : (
@@ -150,6 +151,7 @@ export function PartnersSection() {
               width={140}
               height={140}
               aria-hidden="true"
+              unoptimized
               className="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 opacity-10"
             />
             <p className="relative text-sm text-muted-foreground">

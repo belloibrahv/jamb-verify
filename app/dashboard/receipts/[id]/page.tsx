@@ -75,6 +75,7 @@ export default async function ReceiptPage({
             width={160}
             height={160}
             aria-hidden="true"
+            unoptimized
             className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 opacity-10 print:opacity-20"
           />
           <div className="flex items-start justify-between gap-6">
@@ -87,16 +88,18 @@ export default async function ReceiptPage({
                   <h1 className="text-2xl font-bold text-primary print:text-3xl">
                     VerifyNIN
                   </h1>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Verified by</span>
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/80 px-3 py-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Verified by
+                    </span>
                     <Image
                       src="/images/nimc.png"
                       alt="NIMC logo"
-                      width={36}
-                      height={36}
+                      width={64}
+                      height={64}
                       priority
                       unoptimized
-                      className="h-8 w-8 object-contain"
+                      className="h-14 w-14 object-contain"
                     />
                   </div>
                 </div>

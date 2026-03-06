@@ -677,6 +677,7 @@ export function DashboardClient() {
             width={160}
             height={160}
             aria-hidden="true"
+            unoptimized
             className="pointer-events-none absolute -left-6 -bottom-6 h-28 w-28 opacity-10"
           />
           <Image
@@ -685,6 +686,7 @@ export function DashboardClient() {
             width={180}
             height={180}
             aria-hidden="true"
+            unoptimized
             className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 opacity-10"
           />
 
