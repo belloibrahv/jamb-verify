@@ -81,27 +81,14 @@ export default async function ReceiptPage({
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-md">
                   <Shield className="h-7 w-7" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-primary print:text-3xl">
                     VerifyNIN
                   </h1>
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/80 px-3 py-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                      Verified by
-                    </span>
-                    <Image
-                      src="/images/nimc.png"
-                      alt="NIMC logo"
-                      width={64}
-                      height={64}
-                      priority
-                      unoptimized
-                      className="h-14 w-14 object-contain"
-                    />
-                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Official Verification Document</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -139,8 +126,30 @@ export default async function ReceiptPage({
               </div>
             </div>
             
-            <div className="print:hidden">
-              <PrintButton />
+            <div className="flex flex-col items-end gap-3">
+              <div className="text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground mb-2">
+                  Verified by
+                </p>
+                <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-md">
+                  <Image
+                    src="/images/nimc.png"
+                    alt="NIMC - National Identity Management Commission"
+                    width={140}
+                    height={140}
+                    priority
+                    unoptimized
+                    className="h-24 w-24 object-contain"
+                  />
+                </div>
+                <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider mt-2">
+                  NIMC Official
+                </p>
+              </div>
+              
+              <div className="print:hidden mt-2">
+                <PrintButton />
+              </div>
             </div>
           </div>
         </div>
