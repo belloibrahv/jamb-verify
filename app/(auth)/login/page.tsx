@@ -3,43 +3,42 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ShieldCheck, LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
 
-const schema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters")
-});
-
-type FormValues = z.infer<typeof schema>;
-
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const form = useForm<FormValues>({ 
-    resolver: zodResolver(schema),
-    mode: "onSubmit"
-  });
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const validateEmail = (email: string) => {
+    if (!email) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Please enter a valid email address";
+    return null;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    // Validate
+    const emailErr = validateEmail(email);
+    const passwordErr = validatePassword(password);
     
-    const values = form.getValues();
-    const validation = schema.safeParse(values);
+    setEmailError(emailErr);
+    setPasswordError(passwordErr);
     
-    if (!validation.success) {
-      // Trigger form validation
-      form.handleSubmit(() => {})();
-      return;
-    }
+    if (emailErr || passwordErr) return;
     
     setLoading(true);
     setError(null);
@@ -48,7 +47,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -60,6 +59,13 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -78,24 +84,25 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Form */}
-      <form 
-        onSubmit={handleFormSubmit}
-        noValidate
-        className="space-y-4"
-      >
+      {/* Form Fields */}
+      <div className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Email Address</label>
           <Input 
             type="email"
             placeholder="you@example.com" 
-            {...form.register("email")}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError(null);
+            }}
+            onKeyPress={handleKeyPress}
             className="h-11"
           />
-          {form.formState.errors.email && (
+          {emailError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
               <AlertCircle className="h-3 w-3" />
-              {form.formState.errors.email.message}
+              {emailError}
             </p>
           )}
         </div>
@@ -106,7 +113,12 @@ export default function LoginPage() {
             <Input 
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
-              {...form.register("password")}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(null);
+              }}
+              onKeyPress={handleKeyPress}
               className="h-11 pr-10"
             />
             <button
@@ -122,10 +134,10 @@ export default function LoginPage() {
               )}
             </button>
           </div>
-          {form.formState.errors.password && (
+          {passwordError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
               <AlertCircle className="h-3 w-3" />
-              {form.formState.errors.password.message}
+              {passwordError}
             </p>
           )}
         </div>
@@ -138,10 +150,11 @@ export default function LoginPage() {
         )}
 
         <Button 
-          type="submit" 
+          type="button"
           size="lg" 
           className="w-full" 
           disabled={loading}
+          onClick={handleSubmit}
         >
           {loading ? (
             "Signing in..."
@@ -152,7 +165,7 @@ export default function LoginPage() {
             </>
           )}
         </Button>
-      </form>
+      </div>
 
       {/* Footer */}
       <div className="space-y-4 text-center">

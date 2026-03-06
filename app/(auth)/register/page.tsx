@@ -3,46 +3,63 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { ShieldCheck, UserPlus, AlertCircle, Eye, EyeOff } from "lucide-react";
 
-const schema = z.object({
-  fullName: z.string().min(3, "Enter your full name (at least 3 characters)"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(8, "Enter a valid phone number"),
-  password: z.string().min(6, "Password must be at least 6 characters")
-});
-
-type FormValues = z.infer<typeof schema>;
-
 export default function RegisterPage() {
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fullNameError, setFullNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const form = useForm<FormValues>({ 
-    resolver: zodResolver(schema),
-    mode: "onSubmit"
-  });
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const validateFullName = (name: string) => {
+    if (!name) return "Full name is required";
+    if (name.length < 3) return "Enter your full name (at least 3 characters)";
+    return null;
+  };
+
+  const validateEmail = (email: string) => {
+    if (!email) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Please enter a valid email address";
+    return null;
+  };
+
+  const validatePhone = (phone: string) => {
+    if (!phone) return "Phone number is required";
+    if (phone.length < 8) return "Enter a valid phone number";
+    return null;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    // Validate
+    const fullNameErr = validateFullName(fullName);
+    const emailErr = validateEmail(email);
+    const phoneErr = validatePhone(phone);
+    const passwordErr = validatePassword(password);
     
-    const values = form.getValues();
-    const validation = schema.safeParse(values);
+    setFullNameError(fullNameErr);
+    setEmailError(emailErr);
+    setPhoneError(phoneErr);
+    setPasswordError(passwordErr);
     
-    if (!validation.success) {
-      // Trigger form validation
-      form.handleSubmit(() => {})();
-      return;
-    }
+    if (fullNameErr || emailErr || phoneErr || passwordErr) return;
     
     setLoading(true);
     setError(null);
@@ -51,7 +68,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ fullName, email, phone, password })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -71,6 +88,13 @@ export default function RegisterPage() {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <Card className="w-full max-w-lg space-y-6 border-border/70 bg-white p-6 shadow-lg sm:p-8">
       {/* Header */}
@@ -86,24 +110,25 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Form */}
-      <form 
-        onSubmit={handleFormSubmit}
-        noValidate
-        className="space-y-4"
-      >
+      {/* Form Fields */}
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>
             <Input 
               placeholder="Aisha Yusuf" 
-              {...form.register("fullName")}
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setFullNameError(null);
+              }}
+              onKeyPress={handleKeyPress}
               className="h-11"
             />
-            {form.formState.errors.fullName && (
+            {fullNameError && (
               <p className="flex items-center gap-1 text-xs text-red-600">
                 <AlertCircle className="h-3 w-3" />
-                {form.formState.errors.fullName.message}
+                {fullNameError}
               </p>
             )}
           </div>
@@ -111,14 +136,19 @@ export default function RegisterPage() {
             <label className="text-sm font-medium">Phone Number</label>
             <Input 
               placeholder="08012345678" 
-              {...form.register("phone")}
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setPhoneError(null);
+              }}
+              onKeyPress={handleKeyPress}
               inputMode="tel"
               className="h-11"
             />
-            {form.formState.errors.phone && (
+            {phoneError && (
               <p className="flex items-center gap-1 text-xs text-red-600">
                 <AlertCircle className="h-3 w-3" />
-                {form.formState.errors.phone.message}
+                {phoneError}
               </p>
             )}
           </div>
@@ -129,13 +159,18 @@ export default function RegisterPage() {
           <Input 
             type="email"
             placeholder="you@example.com" 
-            {...form.register("email")}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError(null);
+            }}
+            onKeyPress={handleKeyPress}
             className="h-11"
           />
-          {form.formState.errors.email && (
+          {emailError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
               <AlertCircle className="h-3 w-3" />
-              {form.formState.errors.email.message}
+              {emailError}
             </p>
           )}
         </div>
@@ -146,7 +181,12 @@ export default function RegisterPage() {
             <Input 
               type={showPassword ? "text" : "password"}
               placeholder="Create a strong password"
-              {...form.register("password")}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(null);
+              }}
+              onKeyPress={handleKeyPress}
               className="h-11 pr-10"
             />
             <button
@@ -162,10 +202,10 @@ export default function RegisterPage() {
               )}
             </button>
           </div>
-          {form.formState.errors.password && (
+          {passwordError && (
             <p className="flex items-center gap-1 text-xs text-red-600">
               <AlertCircle className="h-3 w-3" />
-              {form.formState.errors.password.message}
+              {passwordError}
             </p>
           )}
         </div>
@@ -178,10 +218,11 @@ export default function RegisterPage() {
         )}
 
         <Button 
-          type="submit" 
+          type="button"
           size="lg" 
           className="w-full" 
           disabled={loading}
+          onClick={handleSubmit}
         >
           {loading ? (
             "Creating account..."
@@ -192,7 +233,7 @@ export default function RegisterPage() {
             </>
           )}
         </Button>
-      </form>
+      </div>
 
       {/* Footer */}
       <div className="space-y-4 text-center">
