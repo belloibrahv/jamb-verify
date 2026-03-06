@@ -2,6 +2,15 @@
 
 import { motion } from "framer-motion";
 
+const particlePositions = [
+  { left: 15, top: 25 },
+  { left: 85, top: 45 },
+  { left: 45, top: 75 },
+  { left: 70, top: 15 },
+  { left: 25, top: 60 },
+  { left: 90, top: 80 }
+];
+
 export function FloatingShapes() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -53,23 +62,23 @@ export function FloatingShapes() {
       />
 
       {/* Floating particles */}
-      {[...Array(6)].map((_, i) => (
+      {particlePositions.map((pos, i) => (
         <motion.div
           key={i}
           className="absolute h-2 w-2 rounded-full bg-primary/20"
           style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`
+            left: `${pos.left}%`,
+            top: `${pos.top}%`
           }}
           animate={{
             y: [0, -100, 0],
             opacity: [0, 1, 0]
           }}
           transition={{
-            duration: 5 + Math.random() * 5,
+            duration: 5 + i,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: Math.random() * 5
+            delay: i * 0.8
           }}
         />
       ))}
