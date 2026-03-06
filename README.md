@@ -65,6 +65,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
+## Testing in Sandbox
+
+For testing with sandbox/test API keys, use these test NINs:
+
+- **Valid NIN (Success):** `11111111111`
+- **Invalid NIN (Not Found):** `00000000000`
+
+See `docs/TEST_DATA.md` for complete test data including Paystack test cards and other test identifiers.
+
 ## Database Setup
 
 ```bash
