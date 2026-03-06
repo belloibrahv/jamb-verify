@@ -99,33 +99,6 @@ export default async function ReceiptPage({
               </p>
             </div>
             
-            {/* Official Badges */}
-            <div className="hidden print:flex flex-col gap-2 text-right">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 border border-green-300">
-                <CheckCircle2 className="h-4 w-4 text-green-700" />
-                <Image
-                  src="/images/nimc.png"
-                  alt="NIMC logo"
-                  width={20}
-                  height={20}
-                  unoptimized
-                  className="h-4 w-4 object-contain"
-                />
-                <span className="text-xs font-semibold text-green-900">Verified</span>
-              </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 border border-blue-300">
-                <Image
-                  src="/images/nimc.png"
-                  alt="NIMC logo"
-                  width={20}
-                  height={20}
-                  unoptimized
-                  className="h-4 w-4 object-contain"
-                />
-                <span className="text-xs font-semibold text-blue-900">Verified</span>
-              </div>
-            </div>
-            
             <div className="flex flex-col items-end gap-3">
               <div className="text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground mb-2">
