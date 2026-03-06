@@ -205,7 +205,7 @@ export function DashboardClient() {
   const verificationsLeft = balance === null ? null : Math.floor(balance / feeKobo);
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 pb-12">
       {/* Wallet Balance Header - Compact */}
       <motion.div variants={fadeIn}>
         <Card className="border-border/50 bg-gradient-to-br from-primary/5 via-white to-accent/5 shadow-sm">
@@ -629,6 +629,75 @@ export function DashboardClient() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </motion.div>
+
+      {/* Dashboard Footer - Important Links */}
+      <motion.div variants={fadeIn} className="mt-12 border-t border-border/50 pt-8">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Quick Links</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/dashboard/transactions" className="hover:text-primary transition-colors">
+                  Transaction History
+                </Link>
+              </li>
+              <li>
+                <Link href="/support" className="hover:text-primary transition-colors">
+                  Help & Support
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Legal</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/privacy" className="hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-primary transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Compliance</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5 text-emerald-600" />
+                NDPR Compliant
+              </li>
+              <li className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5 text-emerald-600" />
+                Secure & Encrypted
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Contact</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <a href="mailto:support@jambverify.com" className="hover:text-primary transition-colors">
+                  support@jambverify.com
+                </a>
+              </li>
+              <li className="text-xs">
+                Made with ❤️ in Nigeria
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-border/50 text-center text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} JAMB Verify. All rights reserved.</p>
         </div>
       </motion.div>
     </motion.div>

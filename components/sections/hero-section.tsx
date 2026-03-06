@@ -9,7 +9,7 @@ import { AnimatedLogo } from "@/components/animations/animated-logo";
 import { FloatingShapes } from "@/components/animations/floating-shapes";
 
 const staggerContainer = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   show: {
     opacity: 1,
     transition: {
@@ -20,7 +20,7 @@ const staggerContainer = {
 };
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: 0 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
@@ -36,7 +36,7 @@ export function HeroSection() {
       <div className="container relative z-10">
         {/* Navigation */}
         <motion.nav
-          initial={{ y: -20, opacity: 0 }}
+          initial={{ y: 0, opacity: 1 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
           className="flex flex-wrap items-center justify-between gap-6"
@@ -59,7 +59,7 @@ export function HeroSection() {
                 key={item}
                 href={`#${item.toLowerCase().replace(" ", "-")}`}
                 className="hover:text-foreground transition-colors relative group"
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * i }}
               >
@@ -71,7 +71,7 @@ export function HeroSection() {
           
           <motion.div
             className="flex items-center gap-3"
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 1, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
@@ -155,7 +155,7 @@ export function HeroSection() {
 
           {/* Animated Card */}
           <motion.div
-            initial={{ opacity: 0, x: 50, rotateY: -15 }}
+            initial={{ opacity: 1, x: 0, rotateY: 0 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             className="relative perspective-1000"
