@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { History, ShieldCheck, UserCircle, Wallet } from "lucide-react";
+import { History, RefreshCw, ShieldCheck, UserCircle, Wallet } from "lucide-react";
 
 import { getSession } from "@/lib/auth";
 import { LogoutButton } from "@/components/organisms/logout-button";
@@ -57,6 +57,13 @@ export default async function DashboardLayout({
                 <History className="h-4 w-4" />
                 History
               </Link>
+              <Link
+                href="/dashboard/recovery"
+                className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/70"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Recovery
+              </Link>
             </nav>
 
             <div className="flex items-center gap-3">
@@ -92,6 +99,13 @@ export default async function DashboardLayout({
             >
               <History className="h-4 w-4" />
               History
+            </Link>
+            <Link
+              href="/dashboard/recovery"
+              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium shadow-sm"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Recovery
             </Link>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   AlertCircle,
   ArrowRight,
@@ -44,8 +45,6 @@ export function DashboardClient() {
   const [nin, setNin] = useState("");
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [checkingPayment, setCheckingPayment] = useState(false);
-  const [paymentReference, setPaymentReference] = useState("");
   const [result, setResult] = useState<{
     status: "success" | "error" | "info";
     message: string;
@@ -72,55 +71,6 @@ export function DashboardClient() {
     setRefreshing(true);
     await loadBalance();
     setRefreshing(false);
-  };
-
-  const handleCheckPayment = async () => {
-    if (!paymentReference.trim()) {
-      setResult({
-        status: "error",
-        message: "Please enter a payment reference"
-      });
-      return;
-    }
-
-    setCheckingPayment(true);
-    setResult(null);
-    
-    try {
-      const res = await fetch("/api/wallet/check-pending-payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reference: paymentReference.trim() })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Failed to check payment");
-      }
-
-      if (data.recovered) {
-        setResult({
-          status: "success",
-          message: `Payment recovered! ${formatNaira(data.amount)} added to your wallet.`
-        });
-        setPaymentReference("");
-        await loadBalance();
-      } else {
-        setResult({
-          status: "info",
-          message: data.message || "Payment already processed"
-        });
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setResult({
-        status: "error",
-        message: errorMessage
-      });
-    } finally {
-      setCheckingPayment(false);
-    }
   };
 
   useEffect(() => {
@@ -632,7 +582,7 @@ export function DashboardClient() {
             </CardContent>
           </Card>
 
-          {/* Check Payment Status Card */}
+          {/* Payment Recovery Shortcut */}
           <Card className="border-blue-200 bg-blue-50/50">
             <CardContent className="p-6">
               <div className="mb-4 flex items-center gap-3">
@@ -640,49 +590,25 @@ export function DashboardClient() {
                   <RefreshCw className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-blue-900">Payment Not Showing?</h3>
-                  <p className="text-xs text-blue-700">Check if your payment went through</p>
+                  <h3 className="font-bold text-blue-900">Payment Recovery</h3>
+                  <p className="text-xs text-blue-700">Fix a debit that didn&apos;t reflect</p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <label htmlFor="payment-ref-input" className="text-sm font-medium text-blue-900">
-                    Payment Reference
-                  </label>
-                  <Input
-                    id="payment-ref-input"
-                    value={paymentReference}
-                    onChange={(e) => setPaymentReference(e.target.value)}
-                    placeholder="Enter payment reference"
-                    className="h-11 bg-white"
-                    disabled={checkingPayment}
-                  />
-                </div>
+              <p className="text-sm text-blue-800 leading-relaxed">
+                Use your payment reference to recover a wallet top-up that didn&apos;t update after checkout.
+              </p>
 
-                <Button
-                  onClick={handleCheckPayment}
-                  disabled={checkingPayment || !paymentReference.trim()}
-                  size="lg"
-                  className="h-11 w-full font-semibold bg-blue-600 hover:bg-blue-700"
-                >
-                  {checkingPayment ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-4 w-4" />
-                      Check Payment Status
-                    </>
-                  )}
-                </Button>
+              <Button asChild size="lg" className="mt-4 w-full font-semibold bg-blue-600 hover:bg-blue-700">
+                <Link href="/dashboard/recovery">
+                  <RefreshCw className="h-4 w-4" />
+                  Open recovery
+                </Link>
+              </Button>
 
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  If money was deducted but didn&apos;t reflect in your wallet, enter the payment reference here to recover it.
-                </p>
-              </div>
+              <p className="mt-3 text-xs text-blue-700 leading-relaxed">
+                Have your payment reference and amount ready before you continue.
+              </p>
             </CardContent>
           </Card>
 
@@ -745,71 +671,95 @@ export function DashboardClient() {
       </motion.div>
 
       {/* Dashboard Footer - Important Links */}
-      <motion.div variants={fadeIn} className="mt-12 border-t border-border/50 pt-8">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Quick Links</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="/dashboard/transactions" className="hover:text-primary transition-colors">
-                  Transaction History
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="hover:text-primary transition-colors">
-                  Help & Support
-                </Link>
-              </li>
-            </ul>
+      <motion.div variants={fadeIn} className="mt-12">
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-white/80 p-6 sm:p-8">
+          <Image
+            src="/images/naija.png"
+            alt=""
+            width={160}
+            height={160}
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-6 -bottom-6 h-28 w-28 opacity-10"
+          />
+          <Image
+            src="/images/nimc.png"
+            alt=""
+            width={180}
+            height={180}
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 opacity-10"
+          />
+
+          <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/dashboard/transactions" className="hover:text-primary transition-colors">
+                    Transaction History
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/recovery" className="hover:text-primary transition-colors">
+                    Payment Recovery
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/support" className="hover:text-primary transition-colors">
+                    Help & Support
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/privacy" className="hover:text-primary transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="hover:text-primary transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Compliance</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5 text-emerald-600" />
+                  NDPR Compliant
+                </li>
+                <li className="flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5 text-emerald-600" />
+                  Secure & Encrypted
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Contact</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a href="mailto:support@verifynin.ng" className="hover:text-primary transition-colors">
+                    support@verifynin.ng
+                  </a>
+                </li>
+                <li className="text-xs">
+                  Made with ❤️ in Nigeria
+                </li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Legal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="/privacy" className="hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
+          <div className="relative mt-6 pt-6 border-t border-border/50 text-center text-xs text-muted-foreground">
+            <p>© {new Date().getFullYear()} VerifyNIN. All rights reserved.</p>
           </div>
-
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Compliance</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <Shield className="h-3.5 w-3.5 text-emerald-600" />
-                NDPR Compliant
-              </li>
-              <li className="flex items-center gap-2">
-                <Shield className="h-3.5 w-3.5 text-emerald-600" />
-                Secure & Encrypted
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Contact</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="mailto:support@verifynin.ng" className="hover:text-primary transition-colors">
-                  support@verifynin.ng
-                </a>
-              </li>
-              <li className="text-xs">
-                Made with ❤️ in Nigeria
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-border/50 text-center text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} VerifyNIN. All rights reserved.</p>
         </div>
       </motion.div>
     </motion.div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, CheckCircle2, Sparkles, Zap, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -191,6 +192,14 @@ export function HeroSection() {
               whileHover={{ scale: 1.02, rotateY: 5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
+              <Image
+                src="/images/naija.png"
+                alt=""
+                width={96}
+                height={96}
+                aria-hidden="true"
+                className="pointer-events-none absolute right-6 top-6 h-16 w-16 opacity-10"
+              />
               <div className="flex items-center justify-between">
                 <div>
                   <motion.p
