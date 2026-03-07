@@ -165,7 +165,7 @@ export function HeroSection() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="hover:bg-primary/5">
-                <Link href="#how">See how it works</Link>
+                <Link href="#how-it-works">See how it works</Link>
               </Button>
             </motion.div>
             
