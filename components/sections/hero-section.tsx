@@ -11,26 +11,26 @@ import { FloatingShapes } from "@/components/animations/floating-shapes";
 
 // Diverse Nigerian names representing different ethnic groups and dual citizenship
 const nigerianNames = [
-  { name: "Aisha Olumide Yusuf", ethnicity: "Hausa-Yoruba" },
-  { name: "Chukwuemeka Adebayo Ibrahim", ethnicity: "Igbo-Yoruba-Hausa" },
-  { name: "Ngozi Fatima Bello", ethnicity: "Igbo-Hausa" },
-  { name: "Oluwaseun Chidinma Musa", ethnicity: "Yoruba-Igbo-Hausa" },
-  { name: "Emeka Abubakar Taiwo", ethnicity: "Igbo-Hausa-Yoruba" },
-  { name: "Blessing Zainab Okafor", ethnicity: "Igbo-Hausa" },
-  { name: "Tunde Chiamaka Hassan", ethnicity: "Yoruba-Igbo-Hausa" },
-  { name: "Amina Chinedu Adeleke", ethnicity: "Hausa-Igbo-Yoruba" },
-  { name: "Ekaette Usman Okoro", ethnicity: "Ibibio-Hausa-Igbo" },
-  { name: "Iniobong Adamu Bassey", ethnicity: "Efik-Hausa" },
-  { name: "Ogheneovo Yakubu Okpara", ethnicity: "Urhobo-Hausa-Igbo" },
-  { name: "Osagie Binta Okonkwo", ethnicity: "Edo-Hausa-Igbo" },
-  { name: "Akpan Folake Udoh", ethnicity: "Ibibio-Yoruba" },
-  { name: "Ifeoma Garba Nwosu", ethnicity: "Igbo-Hausa" },
-  { name: "Kelechi Aisha Williams", ethnicity: "Igbo-Hausa-British" },
-  { name: "Obinna James Anderson", ethnicity: "Igbo-American" },
-  { name: "Chioma Marie Dubois", ethnicity: "Igbo-French" },
-  { name: "Adebayo Michael Chen", ethnicity: "Yoruba-Chinese" },
-  { name: "Fatima Rose Martinez", ethnicity: "Hausa-Spanish" },
-  { name: "Chiamaka Sofia Rossi", ethnicity: "Igbo-Italian" }
+  { name: "Aisha Olumide Yusuf", ethnicity: "Hausa-Yoruba", dob: "12 Nov 2006" },
+  { name: "Chukwuemeka Adebayo Ibrahim", ethnicity: "Igbo-Yoruba-Hausa", dob: "23 Mar 1998" },
+  { name: "Ngozi Fatima Bello", ethnicity: "Igbo-Hausa", dob: "08 Jul 2001" },
+  { name: "Oluwaseun Chidinma Musa", ethnicity: "Yoruba-Igbo-Hausa", dob: "15 Jan 2003" },
+  { name: "Emeka Abubakar Taiwo", ethnicity: "Igbo-Hausa-Yoruba", dob: "29 Sep 1999" },
+  { name: "Blessing Zainab Okafor", ethnicity: "Igbo-Hausa", dob: "04 Dec 2004" },
+  { name: "Tunde Chiamaka Hassan", ethnicity: "Yoruba-Igbo-Hausa", dob: "18 May 2000" },
+  { name: "Amina Chinedu Adeleke", ethnicity: "Hausa-Igbo-Yoruba", dob: "21 Aug 2002" },
+  { name: "Ekaette Usman Okoro", ethnicity: "Ibibio-Hausa-Igbo", dob: "07 Feb 1997" },
+  { name: "Iniobong Adamu Bassey", ethnicity: "Efik-Hausa", dob: "14 Oct 2005" },
+  { name: "Ogheneovo Yakubu Okpara", ethnicity: "Urhobo-Hausa-Igbo", dob: "26 Jun 2001" },
+  { name: "Osagie Binta Okonkwo", ethnicity: "Edo-Hausa-Igbo", dob: "03 Apr 1996" },
+  { name: "Akpan Folake Udoh", ethnicity: "Ibibio-Yoruba", dob: "19 Nov 2003" },
+  { name: "Ifeoma Garba Nwosu", ethnicity: "Igbo-Hausa", dob: "11 Jan 2000" },
+  { name: "Kelechi Aisha Williams", ethnicity: "Igbo-Hausa-British", dob: "25 Jul 1999" },
+  { name: "Obinna James Anderson", ethnicity: "Igbo-American", dob: "09 Mar 2002" },
+  { name: "Chioma Marie Dubois", ethnicity: "Igbo-French", dob: "16 Sep 1998" },
+  { name: "Adebayo Michael Chen", ethnicity: "Yoruba-Chinese", dob: "22 Dec 2004" },
+  { name: "Fatima Rose Martinez", ethnicity: "Hausa-Spanish", dob: "05 May 2001" },
+  { name: "Chiamaka Sofia Rossi", ethnicity: "Igbo-Italian", dob: "30 Aug 2003" }
 ];
 
 const staggerContainer = {
@@ -275,7 +275,20 @@ export function HeroSection() {
                       </motion.p>
                     </AnimatePresence>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">DOB: 12 Nov 2006</p>
+                  <div className="relative h-5 overflow-hidden mt-1">
+                    <AnimatePresence mode="wait">
+                      <motion.p
+                        key={`dob-${currentNameIndex}`}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeInOut", delay: 0.1 }}
+                        className="text-sm text-muted-foreground absolute inset-0"
+                      >
+                        DOB: {nigerianNames[currentNameIndex].dob}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
                 </motion.div>
                 
                 <motion.div
