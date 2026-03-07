@@ -68,7 +68,7 @@ export default function RecoveryPage() {
         });
         setReference("");
       }
-    } catch (error) {
+    } catch {
       setResult({
         status: "error",
         message: "Network error. Please check your connection and try again."
