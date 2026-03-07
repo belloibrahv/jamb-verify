@@ -24,7 +24,7 @@ export function SectionTitle({
         {title}
       </h2>
       {description ? (
-        <p className="max-w-2xl text-base text-muted-foreground">{description}</p>
+        <p className="max-w-2xl text-base text-muted-foreground mx-auto">{description}</p>
       ) : null}
     </div>
   );

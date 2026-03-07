@@ -57,24 +57,26 @@ export function SecuritySection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="flex flex-wrap items-center justify-between gap-6"
+          className="text-center mx-auto max-w-3xl"
         >
-          <SectionTitle
-            eyebrow="Privacy & Security"
-            title="NDPR-aligned safeguards for candidate data"
-            description="NIN verification handles sensitive identity data. Every piece of information is stored minimally and securely."
-          />
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            whileInView={{ scale: 1, rotate: 0 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
-          >
-            <Badge variant="success" className="text-base px-4 py-2">
-              <ShieldCheck className="h-4 w-4 mr-2" />
-              NDPR Compliant
-            </Badge>
-          </motion.div>
+          <div className="flex flex-col items-center gap-6">
+            <SectionTitle
+              eyebrow="Privacy & Security"
+              title="NDPR-aligned safeguards for candidate data"
+              description="NIN verification handles sensitive identity data. Every piece of information is stored minimally and securely."
+            />
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+            >
+              <Badge variant="success" className="text-base px-4 py-2">
+                <ShieldCheck className="h-4 w-4 mr-2" />
+                NDPR Compliant
+              </Badge>
+            </motion.div>
+          </div>
         </motion.div>
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

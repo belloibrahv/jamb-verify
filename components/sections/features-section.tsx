@@ -80,23 +80,25 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="flex flex-wrap items-center justify-between gap-6"
+          className="text-center mx-auto max-w-3xl"
         >
-          <SectionTitle
-            eyebrow="Features"
-            title="Built for reliable NIN verification"
-            description="Every feature designed for fast, secure verification: wallet funding, NIN validation, and instant verification documents."
-          />
-          <motion.div
-            initial={{ scale: 1 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
-          >
-            <Badge variant="warning" className="text-base px-4 py-2">
-              ₦500 per verification
-            </Badge>
-          </motion.div>
+          <div className="flex flex-col items-center gap-6">
+            <SectionTitle
+              eyebrow="Features"
+              title="Built for reliable NIN verification"
+              description="Every feature designed for fast, secure verification: wallet funding, NIN validation, and instant verification documents."
+            />
+            <motion.div
+              initial={{ scale: 1 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+            >
+              <Badge variant="warning" className="text-base px-4 py-2">
+                ₦500 per verification
+              </Badge>
+            </motion.div>
+          </div>
         </motion.div>
         
         <motion.div
