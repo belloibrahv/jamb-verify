@@ -1,12 +1,25 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowRight, CheckCircle2, Sparkles, Zap, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedLogo } from "@/components/animations/animated-logo";
 import { FloatingShapes } from "@/components/animations/floating-shapes";
+
+// Diverse Nigerian names representing different ethnic groups
+const nigerianNames = [
+  { name: "Aisha Olumide Yusuf", ethnicity: "Hausa-Yoruba" },
+  { name: "Chukwuemeka Adebayo Ibrahim", ethnicity: "Igbo-Yoruba-Hausa" },
+  { name: "Ngozi Fatima Bello", ethnicity: "Igbo-Hausa" },
+  { name: "Oluwaseun Chidinma Musa", ethnicity: "Yoruba-Igbo-Hausa" },
+  { name: "Emeka Abubakar Taiwo", ethnicity: "Igbo-Hausa-Yoruba" },
+  { name: "Blessing Zainab Okafor", ethnicity: "Igbo-Hausa" },
+  { name: "Tunde Chiamaka Hassan", ethnicity: "Yoruba-Igbo-Hausa" },
+  { name: "Amina Chinedu Adeleke", ethnicity: "Hausa-Igbo-Yoruba" }
+];
 
 const staggerContainer = {
   hidden: { opacity: 1 },
@@ -25,9 +38,18 @@ const staggerItem = {
 };
 
 export function HeroSection() {
+  const [currentNameIndex, setCurrentNameIndex] = useState(0);
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 300], [0, 50]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+
+  // Rotate through names every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentNameIndex((prev) => (prev + 1) % nigerianNames.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="relative overflow-hidden pb-20 pt-6">
@@ -227,7 +249,20 @@ export function HeroSection() {
                   transition={{ type: "spring", stiffness: 400 }}
                 >
                   <p className="text-xs text-muted-foreground mb-2">Candidate</p>
-                  <p className="text-lg font-bold">Aisha Olumide Yusuf</p>
+                  <div className="relative h-7 overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.p
+                        key={currentNameIndex}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        className="text-lg font-bold absolute inset-0"
+                      >
+                        {nigerianNames[currentNameIndex].name}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
                   <p className="text-sm text-muted-foreground mt-1">DOB: 12 Nov 2006</p>
                 </motion.div>
                 
