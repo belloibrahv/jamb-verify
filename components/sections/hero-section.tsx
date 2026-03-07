@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { AnimatedLogo } from "@/components/animations/animated-logo";
 import { FloatingShapes } from "@/components/animations/floating-shapes";
 
-// Diverse Nigerian names representing different ethnic groups
+// Diverse Nigerian names representing different ethnic groups and dual citizenship
 const nigerianNames = [
   { name: "Aisha Olumide Yusuf", ethnicity: "Hausa-Yoruba" },
   { name: "Chukwuemeka Adebayo Ibrahim", ethnicity: "Igbo-Yoruba-Hausa" },
@@ -18,7 +18,19 @@ const nigerianNames = [
   { name: "Emeka Abubakar Taiwo", ethnicity: "Igbo-Hausa-Yoruba" },
   { name: "Blessing Zainab Okafor", ethnicity: "Igbo-Hausa" },
   { name: "Tunde Chiamaka Hassan", ethnicity: "Yoruba-Igbo-Hausa" },
-  { name: "Amina Chinedu Adeleke", ethnicity: "Hausa-Igbo-Yoruba" }
+  { name: "Amina Chinedu Adeleke", ethnicity: "Hausa-Igbo-Yoruba" },
+  { name: "Ekaette Usman Okoro", ethnicity: "Ibibio-Hausa-Igbo" },
+  { name: "Iniobong Adamu Bassey", ethnicity: "Efik-Hausa" },
+  { name: "Ogheneovo Yakubu Okpara", ethnicity: "Urhobo-Hausa-Igbo" },
+  { name: "Osagie Binta Okonkwo", ethnicity: "Edo-Hausa-Igbo" },
+  { name: "Akpan Folake Udoh", ethnicity: "Ibibio-Yoruba" },
+  { name: "Ifeoma Garba Nwosu", ethnicity: "Igbo-Hausa" },
+  { name: "Kelechi Aisha Williams", ethnicity: "Igbo-Hausa-British" },
+  { name: "Obinna James Anderson", ethnicity: "Igbo-American" },
+  { name: "Chioma Marie Dubois", ethnicity: "Igbo-French" },
+  { name: "Adebayo Michael Chen", ethnicity: "Yoruba-Chinese" },
+  { name: "Fatima Rose Martinez", ethnicity: "Hausa-Spanish" },
+  { name: "Chiamaka Sofia Rossi", ethnicity: "Igbo-Italian" }
 ];
 
 const staggerContainer = {
