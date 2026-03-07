@@ -88,16 +88,20 @@ export function HeroSection() {
           </Link>
           
           <div className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
-            {["Features", "How it works", "Privacy"].map((item, i) => (
+            {[
+              { label: "Features", href: "#features" },
+              { label: "How it works", href: "#how-it-works" },
+              { label: "Privacy", href: "#security" }
+            ].map((item, i) => (
               <motion.a
-                key={item}
-                href={`#${item.toLowerCase().replace(" ", "-")}`}
+                key={item.label}
+                href={item.href}
                 className="hover:text-foreground transition-colors relative group"
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * i }}
               >
-                {item}
+                {item.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
               </motion.a>
             ))}
