@@ -53,7 +53,6 @@ export function HeroSection() {
   const [currentNameIndex, setCurrentNameIndex] = useState(0);
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 300], [0, 50]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   // Rotate through names every 3 seconds
   useEffect(() => {
@@ -131,7 +130,7 @@ export function HeroSection() {
             initial="hidden"
             animate="show"
             className="space-y-8"
-            style={{ y, opacity }}
+            style={{ y }}
           >
             <motion.div variants={staggerItem}>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-300 text-green-800">
