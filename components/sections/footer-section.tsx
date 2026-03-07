@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { AnimatedLogo } from "@/components/animations/animated-logo";
-import { Github, Twitter, Mail, ArrowUp } from "lucide-react";
+import { Facebook, Twitter, Mail, ArrowUp } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function FooterSection() {
@@ -34,8 +35,14 @@ export function FooterSection() {
           >
             <div className="flex items-center gap-3">
               <AnimatedLogo />
-              <div>
-                <p className="text-lg font-bold">VerifyNIN</p>
+              <div className="space-y-1">
+                <Image
+                  src="/images/logo-wordmark.svg"
+                  alt="VerifyNIN wordmark"
+                  width={150}
+                  height={40}
+                  className="h-7 w-auto"
+                />
                 <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   Nigeria
                 </p>
@@ -56,14 +63,14 @@ export function FooterSection() {
                 <Twitter className="h-4 w-4" />
               </motion.a>
               <motion.a
-                href="https://github.com"
+                href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Github className="h-4 w-4" />
+                <Facebook className="h-4 w-4" />
               </motion.a>
               <motion.a
                 href="mailto:support@verifynin.ng"
@@ -86,14 +93,19 @@ export function FooterSection() {
           >
             <h3 className="font-semibold text-foreground">Product</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              {["Features", "Pricing", "How it works", "FAQ"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "Features", href: "#features" },
+                { label: "How it works", href: "#how-it-works" },
+                { label: "Use cases", href: "#use-cases" },
+                { label: "Privacy & Security", href: "#security" }
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    href={`#${item.toLowerCase().replace(" ", "-")}`}
+                    href={item.href}
                     className="hover:text-primary transition-colors inline-flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform">
-                      {item}
+                      {item.label}
                     </span>
                   </Link>
                 </li>
@@ -111,12 +123,7 @@ export function FooterSection() {
           >
             <h3 className="font-semibold text-foreground">Company</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              {[
-                { label: "About", href: "/about" },
-                { label: "Blog", href: "/blog" },
-                { label: "Careers", href: "/careers" },
-                { label: "Contact", href: "/support" }
-              ].map((item) => (
+              {[{ label: "Contact Us", href: "/support" }].map((item) => (
                 <li key={item.label}>
                   <Link
                     href={item.href}
@@ -143,9 +150,7 @@ export function FooterSection() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               {[
                 { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-                { label: "Cookie Policy", href: "/cookies" },
-                { label: "NDPR Compliance", href: "/ndpr" }
+                { label: "Terms of Service", href: "/terms" }
               ].map((item) => (
                 <li key={item.label}>
                   <Link
@@ -173,9 +178,12 @@ export function FooterSection() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} VerifyNIN. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <span>Made with ❤️ in Nigeria</span>
-          </div>
+          <a
+            href="mailto:support@verifynin.ng"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            support@verifynin.ng
+          </a>
         </motion.div>
       </div>
 
