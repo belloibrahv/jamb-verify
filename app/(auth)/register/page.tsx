@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getFriendlyErrorMessage } from "@/lib/utils";
-import { ShieldCheck, UserPlus, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { UserPlus, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -99,8 +100,22 @@ export default function RegisterPage() {
     <Card className="w-full max-w-lg space-y-6 border-border/70 bg-white p-6 shadow-lg sm:p-8">
       {/* Header */}
       <div className="space-y-3 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <ShieldCheck className="h-7 w-7" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative h-14 w-14 overflow-hidden rounded-2xl bg-white shadow-sm">
+            <Image
+              src="/images/logo-mark.svg"
+              alt="VerifyNIN logo"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <Image
+            src="/images/logo-wordmark.svg"
+            alt="VerifyNIN wordmark"
+            width={150}
+            height={40}
+            className="h-8 w-auto"
+          />
         </div>
         <div className="space-y-1">
           <h1 className="font-heading text-2xl font-bold sm:text-3xl">Create Account</h1>

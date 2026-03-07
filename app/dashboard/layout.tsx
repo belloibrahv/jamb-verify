@@ -1,7 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { History, RefreshCw, ShieldCheck, UserCircle, Wallet } from "lucide-react";
+import { History, RefreshCw, UserCircle, Wallet } from "lucide-react";
 
 import { getSession } from "@/lib/auth";
 import { LogoutButton } from "@/components/organisms/logout-button";
@@ -31,13 +32,22 @@ export default async function DashboardLayout({
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-between gap-4 py-4">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-glow">
-                <ShieldCheck className="h-5 w-5" />
+              <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white shadow-glow">
+                <Image
+                  src="/images/logo-mark.svg"
+                  alt="VerifyNIN logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
-                  VerifyNIN
-                </p>
+              <div className="space-y-1">
+                <Image
+                  src="/images/logo-wordmark.svg"
+                  alt="VerifyNIN wordmark"
+                  width={140}
+                  height={36}
+                  className="h-6 w-auto"
+                />
                 <p className="text-sm text-muted-foreground">Dashboard</p>
               </div>
             </Link>

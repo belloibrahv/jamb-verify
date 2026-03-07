@@ -81,14 +81,23 @@ export default async function ReceiptPage({
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-                  <Shield className="h-7 w-7" />
+                <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white shadow-md">
+                  <Image
+                    src="/images/logo-mark.svg"
+                    alt="VerifyNIN logo"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-primary print:text-3xl">
-                    VerifyNIN
-                  </h1>
-                  <p className="text-xs text-muted-foreground mt-0.5">Official Verification Document</p>
+                <div className="space-y-1">
+                  <Image
+                    src="/images/logo-wordmark.svg"
+                    alt="VerifyNIN wordmark"
+                    width={160}
+                    height={42}
+                    className="h-7 w-auto"
+                  />
+                  <p className="text-xs text-muted-foreground">Official Verification Document</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
