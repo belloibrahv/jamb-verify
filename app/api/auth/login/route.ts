@@ -78,6 +78,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
+    // Check if user is suspended
+    if (user.isSuspended) {
+      await logAuditEvent({
+        timestamp: new Date().toISOString(),
+        eventType: "user.login",
+        userId: user.id,
+        ipAddress: ip,
+        userAgent: request.headers.get("user-agent") || undefined,
+        resource: "user",
+        action: "login",
+        status: "failure",
+        errorMessage: "Account suspended",
+        metadata: { email: data.email, suspendedReason: user.suspendedReason }
+      });
+
+      return NextResponse.json(
+        { 
+          message: `Your account has been suspended. Reason: ${user.suspendedReason || "Contact support for details."}` 
+        },
+        { status: 403 }
+      );
+    }
+
     const valid = await bcrypt.compare(data.password, user.passwordHash);
     if (!valid) {
       await logAuditEvent({
@@ -99,7 +122,8 @@ export async function POST(request: Request) {
     await setSessionCookie({
       userId: user.id,
       email: user.email,
-      fullName: user.fullName
+      fullName: user.fullName,
+      role: user.role
     });
 
     // Log successful login

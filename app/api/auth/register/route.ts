@@ -112,7 +112,8 @@ export async function POST(request: Request) {
     await setSessionCookie({
       userId,
       email: data.email,
-      fullName: data.fullName
+      fullName: data.fullName,
+      role: "user"
     });
 
     // Log successful registration
