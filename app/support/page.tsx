@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 export default function SupportPage() {
   return (
     <div className="container py-16">
@@ -12,9 +15,18 @@ export default function SupportPage() {
             account issues, billing questions, or verification concerns and we&apos;ll guide
             you through the next steps.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="rounded-full bg-muted px-3 py-1">Primary: Email support</span>
             <span className="rounded-full bg-muted px-3 py-1">Coverage: WAT</span>
+          </div>
+          <div className="mt-6">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Homepage
+            </Link>
           </div>
         </header>
 
